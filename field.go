@@ -1,6 +1,7 @@
 package goda
 
 import (
+	"errors"
 	"math"
 	"strconv"
 )
@@ -159,16 +160,17 @@ var fieldDescriptors = []fieldDescriptor{
 
 func (f Field) check(value int64) error {
 	if !f.Valid() {
-		return newError("Invalid field: %d", f)
+		return errors.New("goda: invalid field " + strconv.Itoa(int(f)))
 	}
 	var r = fieldDescriptors[f].fieldRange
 	if r.Valid && (value < r.Min || value > r.Max) {
-		return &Error{
-			outOfRange:      &r,
-			outOfRangeValue: value,
-		}
+		return fieldOutOfRangeError(f, value)
 	}
 	return nil
+}
+
+func (f Field) fieldRange() fieldRange {
+	return fieldDescriptors[f].fieldRange
 }
 
 func (f Field) checkSetE(value int64, e *error) {
@@ -180,7 +182,7 @@ func (f Field) checkSetE(value int64, e *error) {
 }
 
 func (f Field) Valid() bool {
-	return f > 0 && int(f) < len(fieldDescriptors)
+	return f > 0 && f <= FieldOffsetSeconds
 }
 
 // String returns the name of the field.

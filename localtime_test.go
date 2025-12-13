@@ -16,21 +16,21 @@ func TestNewLocalTime(t *testing.T) {
 		assert.Equal(t, 0, lt.Hour())
 		assert.Equal(t, 0, lt.Minute())
 		assert.Equal(t, 0, lt.Second())
-		assert.Equal(t, 0, lt.Nanosecond())
+		assert.Equal(t, 0, lt.Nano())
 
 		lt, err = LocalTimeOf(23, 59, 59, 999999999)
 		require.NoError(t, err)
 		assert.Equal(t, 23, lt.Hour())
 		assert.Equal(t, 59, lt.Minute())
 		assert.Equal(t, 59, lt.Second())
-		assert.Equal(t, 999999999, lt.Nanosecond())
+		assert.Equal(t, 999999999, lt.Nano())
 
 		lt, err = LocalTimeOf(12, 30, 45, 123456789)
 		require.NoError(t, err)
 		assert.Equal(t, 12, lt.Hour())
 		assert.Equal(t, 30, lt.Minute())
 		assert.Equal(t, 45, lt.Second())
-		assert.Equal(t, 123456789, lt.Nanosecond())
+		assert.Equal(t, 123456789, lt.Nano())
 	})
 
 	t.Run("invalid hour", func(t *testing.T) {
@@ -82,7 +82,7 @@ func TestMustNewLocalTime(t *testing.T) {
 			assert.Equal(t, 14, lt.Hour())
 			assert.Equal(t, 30, lt.Minute())
 			assert.Equal(t, 45, lt.Second())
-			assert.Equal(t, 123456789, lt.Nanosecond())
+			assert.Equal(t, 123456789, lt.Nano())
 		})
 	})
 
@@ -139,7 +139,7 @@ func TestLocalTime_Components(t *testing.T) {
 			assert.Equal(t, tt.hour, lt.Hour(), "Hour")
 			assert.Equal(t, tt.minute, lt.Minute(), "Minute")
 			assert.Equal(t, tt.second, lt.Second(), "Second")
-			assert.Equal(t, tt.nanosecond, lt.Nanosecond(), "Nanosecond")
+			assert.Equal(t, tt.nanosecond, lt.Nano(), "Nano")
 			assert.Equal(t, tt.millisecond, lt.Millisecond(), "Millisecond")
 		})
 	}
@@ -148,7 +148,7 @@ func TestLocalTime_Components(t *testing.T) {
 	assert.Equal(t, 0, zero.Hour())
 	assert.Equal(t, 0, zero.Minute())
 	assert.Equal(t, 0, zero.Second())
-	assert.Equal(t, 0, zero.Nanosecond())
+	assert.Equal(t, 0, zero.Nano())
 	assert.Equal(t, 0, zero.Millisecond())
 }
 
@@ -203,7 +203,7 @@ func TestLocalTime_GoTime(t *testing.T) {
 	assert.Equal(t, 123456789, goTime.Nanosecond())
 	assert.Equal(t, time.UTC, goTime.Location())
 
-	// Check that date is set to epoch
+	// check that date is set to epoch
 	assert.Equal(t, 1970, goTime.Year())
 	assert.Equal(t, time.January, goTime.Month())
 	assert.Equal(t, 1, goTime.Day())
@@ -219,7 +219,7 @@ func TestNewLocalTimeByGoTime(t *testing.T) {
 	assert.Equal(t, 14, lt.Hour())
 	assert.Equal(t, 30, lt.Minute())
 	assert.Equal(t, 45, lt.Second())
-	assert.Equal(t, 123456789, lt.Nanosecond())
+	assert.Equal(t, 123456789, lt.Nano())
 
 	// Test with different time zone (should ignore timezone)
 	loc, _ := time.LoadLocation("America/New_York")
@@ -229,7 +229,7 @@ func TestNewLocalTimeByGoTime(t *testing.T) {
 	assert.Equal(t, 14, lt.Hour())
 	assert.Equal(t, 30, lt.Minute())
 	assert.Equal(t, 45, lt.Second())
-	assert.Equal(t, 123456789, lt.Nanosecond())
+	assert.Equal(t, 123456789, lt.Nano())
 
 	// Test with zero time
 	lt = LocalTimeOfGoTime(time.Time{})
@@ -496,7 +496,7 @@ func TestLocalTime_SpecialCases(t *testing.T) {
 		assert.Equal(t, 0, lt.Hour())
 		assert.Equal(t, 0, lt.Minute())
 		assert.Equal(t, 0, lt.Second())
-		assert.Equal(t, 0, lt.Nanosecond())
+		assert.Equal(t, 0, lt.Nano())
 	})
 
 	t.Run("one nanosecond before midnight", func(t *testing.T) {
@@ -504,7 +504,7 @@ func TestLocalTime_SpecialCases(t *testing.T) {
 		assert.Equal(t, 23, lt.Hour())
 		assert.Equal(t, 59, lt.Minute())
 		assert.Equal(t, 59, lt.Second())
-		assert.Equal(t, 999999999, lt.Nanosecond())
+		assert.Equal(t, 999999999, lt.Nano())
 		assert.Equal(t, 999, lt.Millisecond())
 	})
 
@@ -524,7 +524,7 @@ func TestLocalTime_SpecialCases(t *testing.T) {
 		lt = MustLocalTimeOf(12, 0, 0, 123456000)
 		assert.Equal(t, "12:00:00.123456", lt.String())
 
-		// Nanosecond precision
+		// Nano precision
 		lt = MustLocalTimeOf(12, 0, 0, 123456789)
 		assert.Equal(t, "12:00:00.123456789", lt.String())
 
@@ -564,7 +564,7 @@ func TestLocalTime_BoundaryValues(t *testing.T) {
 			assert.Equal(t, tt.hour, lt.Hour())
 			assert.Equal(t, tt.minute, lt.Minute())
 			assert.Equal(t, tt.second, lt.Second())
-			assert.Equal(t, tt.nanosecond, lt.Nanosecond())
+			assert.Equal(t, tt.nanosecond, lt.Nano())
 
 			// Round-trip through string
 			str := lt.String()
@@ -646,7 +646,7 @@ func TestLocalTime_CompareConsistency(t *testing.T) {
 		assert.False(t, lt.IsAfter(lt), "time should not be after itself")
 
 		// Create copy and test
-		copy := MustLocalTimeOf(lt.Hour(), lt.Minute(), lt.Second(), lt.Nanosecond())
+		copy := MustLocalTimeOf(lt.Hour(), lt.Minute(), lt.Second(), lt.Nano())
 		assert.Equal(t, 0, lt.Compare(copy), "times[%d] should equal its copy", i)
 	}
 }
@@ -821,443 +821,6 @@ func TestLocalTime_ValueMySQL(t *testing.T) {
 	})
 }
 
-func TestLocalTime_PlusHours(t *testing.T) {
-	t.Run("add positive hours", func(t *testing.T) {
-		// Normal addition
-		lt := MustLocalTimeOf(10, 30, 45, 123456789)
-		result := lt.PlusHours(2)
-		assert.Equal(t, MustLocalTimeOf(12, 30, 45, 123456789), result)
-
-		// Add 1 hour
-		lt = MustLocalTimeOf(14, 0, 0, 0)
-		result = lt.PlusHours(1)
-		assert.Equal(t, MustLocalTimeOf(15, 0, 0, 0), result)
-	})
-
-	t.Run("wrap around midnight", func(t *testing.T) {
-		// 23:00 + 2 hours = 01:00
-		lt := MustLocalTimeOf(23, 0, 0, 0)
-		result := lt.PlusHours(2)
-		assert.Equal(t, MustLocalTimeOf(1, 0, 0, 0), result)
-
-		// 22:30 + 3 hours = 01:30
-		lt = MustLocalTimeOf(22, 30, 45, 123)
-		result = lt.PlusHours(3)
-		assert.Equal(t, MustLocalTimeOf(1, 30, 45, 123), result)
-
-		// Add exactly 24 hours (full day wrap)
-		lt = MustLocalTimeOf(10, 30, 0, 0)
-		result = lt.PlusHours(24)
-		assert.Equal(t, lt, result)
-	})
-
-	t.Run("add negative hours", func(t *testing.T) {
-		// Subtract hours
-		lt := MustLocalTimeOf(10, 30, 45, 123456789)
-		result := lt.PlusHours(-2)
-		assert.Equal(t, MustLocalTimeOf(8, 30, 45, 123456789), result)
-
-		// Wrap backwards past midnight
-		lt = MustLocalTimeOf(1, 0, 0, 0)
-		result = lt.PlusHours(-2)
-		assert.Equal(t, MustLocalTimeOf(23, 0, 0, 0), result)
-	})
-
-	t.Run("large values", func(t *testing.T) {
-		// Add many hours (multiple days)
-		lt := MustLocalTimeOf(10, 0, 0, 0)
-		result := lt.PlusHours(50) // 2 days + 2 hours
-		assert.Equal(t, MustLocalTimeOf(12, 0, 0, 0), result)
-
-		// Subtract many hours
-		lt = MustLocalTimeOf(10, 0, 0, 0)
-		result = lt.PlusHours(-50) // Go back 2 days + 2 hours
-		assert.Equal(t, MustLocalTimeOf(8, 0, 0, 0), result)
-	})
-
-	t.Run("zero value", func(t *testing.T) {
-		var zero LocalTime
-		result := zero.PlusHours(5)
-		assert.True(t, result.IsZero())
-	})
-}
-
-func TestLocalTime_PlusMinutes(t *testing.T) {
-	t.Run("add positive minutes", func(t *testing.T) {
-		// Normal addition
-		lt := MustLocalTimeOf(10, 30, 45, 123456789)
-		result := lt.PlusMinutes(15)
-		assert.Equal(t, MustLocalTimeOf(10, 45, 45, 123456789), result)
-
-		// Add minutes that roll over to next hour
-		lt = MustLocalTimeOf(14, 50, 0, 0)
-		result = lt.PlusMinutes(20)
-		assert.Equal(t, MustLocalTimeOf(15, 10, 0, 0), result)
-	})
-
-	t.Run("wrap around midnight", func(t *testing.T) {
-		// 23:50 + 20 minutes = 00:10
-		lt := MustLocalTimeOf(23, 50, 0, 0)
-		result := lt.PlusMinutes(20)
-		assert.Equal(t, MustLocalTimeOf(0, 10, 0, 0), result)
-
-		// 23:59 + 1 minute = 00:00
-		lt = MustLocalTimeOf(23, 59, 30, 500)
-		result = lt.PlusMinutes(1)
-		assert.Equal(t, MustLocalTimeOf(0, 0, 30, 500), result)
-	})
-
-	t.Run("add negative minutes", func(t *testing.T) {
-		// Subtract minutes
-		lt := MustLocalTimeOf(10, 30, 45, 123456789)
-		result := lt.PlusMinutes(-15)
-		assert.Equal(t, MustLocalTimeOf(10, 15, 45, 123456789), result)
-
-		// Wrap backwards past midnight
-		lt = MustLocalTimeOf(0, 10, 0, 0)
-		result = lt.PlusMinutes(-20)
-		assert.Equal(t, MustLocalTimeOf(23, 50, 0, 0), result)
-	})
-
-	t.Run("large values", func(t *testing.T) {
-		// Add many minutes (multiple days)
-		lt := MustLocalTimeOf(10, 0, 0, 0)
-		result := lt.PlusMinutes(1500) // 25 hours = 1 day + 1 hour
-		assert.Equal(t, MustLocalTimeOf(11, 0, 0, 0), result)
-	})
-
-	t.Run("zero value", func(t *testing.T) {
-		var zero LocalTime
-		result := zero.PlusMinutes(30)
-		assert.True(t, result.IsZero())
-	})
-}
-
-func TestLocalTime_PlusSeconds(t *testing.T) {
-	t.Run("add positive seconds", func(t *testing.T) {
-		// Normal addition
-		lt := MustLocalTimeOf(10, 30, 45, 123456789)
-		result := lt.PlusSeconds(10)
-		assert.Equal(t, MustLocalTimeOf(10, 30, 55, 123456789), result)
-
-		// Add seconds that roll over to next minute
-		lt = MustLocalTimeOf(14, 30, 50, 0)
-		result = lt.PlusSeconds(20)
-		assert.Equal(t, MustLocalTimeOf(14, 31, 10, 0), result)
-	})
-
-	t.Run("wrap around midnight", func(t *testing.T) {
-		// 23:59:50 + 20 seconds = 00:00:10
-		lt := MustLocalTimeOf(23, 59, 50, 0)
-		result := lt.PlusSeconds(20)
-		assert.Equal(t, MustLocalTimeOf(0, 0, 10, 0), result)
-
-		// 23:59:59 + 1 second = 00:00:00
-		lt = MustLocalTimeOf(23, 59, 59, 999)
-		result = lt.PlusSeconds(1)
-		assert.Equal(t, MustLocalTimeOf(0, 0, 0, 999), result)
-	})
-
-	t.Run("add negative seconds", func(t *testing.T) {
-		// Subtract seconds
-		lt := MustLocalTimeOf(10, 30, 45, 123456789)
-		result := lt.PlusSeconds(-10)
-		assert.Equal(t, MustLocalTimeOf(10, 30, 35, 123456789), result)
-
-		// Wrap backwards past midnight
-		lt = MustLocalTimeOf(0, 0, 10, 0)
-		result = lt.PlusSeconds(-20)
-		assert.Equal(t, MustLocalTimeOf(23, 59, 50, 0), result)
-	})
-
-	t.Run("large values", func(t *testing.T) {
-		// Add many seconds (multiple days)
-		lt := MustLocalTimeOf(10, 0, 0, 0)
-		result := lt.PlusSeconds(90000) // 25 hours in seconds
-		assert.Equal(t, MustLocalTimeOf(11, 0, 0, 0), result)
-	})
-
-	t.Run("zero value", func(t *testing.T) {
-		var zero LocalTime
-		result := zero.PlusSeconds(30)
-		assert.True(t, result.IsZero())
-	})
-}
-
-func TestLocalTime_PlusNanos(t *testing.T) {
-	t.Run("add positive nanoseconds", func(t *testing.T) {
-		// Normal addition
-		lt := MustLocalTimeOf(10, 30, 45, 123456789)
-		result := lt.PlusNanos(100)
-		assert.Equal(t, MustLocalTimeOf(10, 30, 45, 123456889), result)
-
-		// Add nanoseconds that roll over to next second
-		lt = MustLocalTimeOf(14, 30, 50, 999999999)
-		result = lt.PlusNanos(1)
-		assert.Equal(t, MustLocalTimeOf(14, 30, 51, 0), result)
-	})
-
-	t.Run("wrap around midnight", func(t *testing.T) {
-		// Add nanoseconds that wrap to next day
-		lt := MustLocalTimeOf(23, 59, 59, 999999999)
-		result := lt.PlusNanos(1)
-		assert.Equal(t, MustLocalTimeOf(0, 0, 0, 0), result)
-	})
-
-	t.Run("add negative nanoseconds", func(t *testing.T) {
-		// Subtract nanoseconds
-		lt := MustLocalTimeOf(10, 30, 45, 123456789)
-		result := lt.PlusNanos(-100)
-		assert.Equal(t, MustLocalTimeOf(10, 30, 45, 123456689), result)
-
-		// Wrap backwards past midnight
-		lt = MustLocalTimeOf(0, 0, 0, 0)
-		result = lt.PlusNanos(-1)
-		assert.Equal(t, MustLocalTimeOf(23, 59, 59, 999999999), result)
-	})
-
-	t.Run("add milliseconds as nanoseconds", func(t *testing.T) {
-		lt := MustLocalTimeOf(10, 0, 0, 0)
-		result := lt.PlusNanos(int64(500 * time.Millisecond))
-		assert.Equal(t, MustLocalTimeOf(10, 0, 0, 500000000), result)
-	})
-
-	t.Run("large values", func(t *testing.T) {
-		// Add nanoseconds equivalent to multiple days
-		lt := MustLocalTimeOf(10, 0, 0, 0)
-		result := lt.PlusNanos(int64(25 * time.Hour))
-		assert.Equal(t, MustLocalTimeOf(11, 0, 0, 0), result)
-	})
-
-	t.Run("zero value", func(t *testing.T) {
-		var zero LocalTime
-		result := zero.PlusNanos(1000000)
-		assert.True(t, result.IsZero())
-	})
-}
-
-func TestLocalTime_PlusMethodsConsistency(t *testing.T) {
-	t.Run("hours and minutes equivalence", func(t *testing.T) {
-		lt := MustLocalTimeOf(10, 0, 0, 0)
-
-		// 2 hours should equal 120 minutes
-		resultHours := lt.PlusHours(2)
-		resultMinutes := lt.PlusMinutes(120)
-		assert.Equal(t, resultHours, resultMinutes)
-	})
-
-	t.Run("minutes and seconds equivalence", func(t *testing.T) {
-		lt := MustLocalTimeOf(10, 0, 0, 0)
-
-		// 5 minutes should equal 300 seconds
-		resultMinutes := lt.PlusMinutes(5)
-		resultSeconds := lt.PlusSeconds(300)
-		assert.Equal(t, resultMinutes, resultSeconds)
-	})
-
-	t.Run("seconds and nanoseconds equivalence", func(t *testing.T) {
-		lt := MustLocalTimeOf(10, 0, 0, 0)
-
-		// 3 seconds should equal 3,000,000,000 nanoseconds
-		resultSeconds := lt.PlusSeconds(3)
-		resultNanos := lt.PlusNanos(3000000000)
-		assert.Equal(t, resultSeconds, resultNanos)
-	})
-
-	t.Run("chaining operations", func(t *testing.T) {
-		lt := MustLocalTimeOf(10, 30, 45, 123456789)
-
-		// Chain multiple operations
-		result := lt.PlusHours(2).PlusMinutes(30).PlusSeconds(15).PlusNanos(100)
-		expected := MustLocalTimeOf(13, 1, 0, 123456889)
-		assert.Equal(t, expected, result)
-	})
-}
-
-func TestLocalTime_MinusHours(t *testing.T) {
-	t.Run("subtract positive hours", func(t *testing.T) {
-		// Normal subtraction
-		lt := MustLocalTimeOf(12, 30, 45, 123456789)
-		result := lt.MinusHours(2)
-		assert.Equal(t, MustLocalTimeOf(10, 30, 45, 123456789), result)
-
-		// Subtract 1 hour
-		lt = MustLocalTimeOf(14, 0, 0, 0)
-		result = lt.MinusHours(1)
-		assert.Equal(t, MustLocalTimeOf(13, 0, 0, 0), result)
-	})
-
-	t.Run("wrap backwards past midnight", func(t *testing.T) {
-		// 01:00 - 2 hours = 23:00
-		lt := MustLocalTimeOf(1, 0, 0, 0)
-		result := lt.MinusHours(2)
-		assert.Equal(t, MustLocalTimeOf(23, 0, 0, 0), result)
-
-		// 01:30 - 3 hours = 22:30
-		lt = MustLocalTimeOf(1, 30, 45, 123)
-		result = lt.MinusHours(3)
-		assert.Equal(t, MustLocalTimeOf(22, 30, 45, 123), result)
-	})
-
-	t.Run("subtract negative hours (adds)", func(t *testing.T) {
-		lt := MustLocalTimeOf(10, 30, 45, 123456789)
-		result := lt.MinusHours(-2)
-		assert.Equal(t, MustLocalTimeOf(12, 30, 45, 123456789), result)
-	})
-
-	t.Run("equivalence with PlusHours", func(t *testing.T) {
-		lt := MustLocalTimeOf(15, 30, 0, 0)
-
-		// MinusHours(5) should equal PlusHours(-5)
-		result1 := lt.MinusHours(5)
-		result2 := lt.PlusHours(-5)
-		assert.Equal(t, result1, result2)
-	})
-
-	t.Run("zero value", func(t *testing.T) {
-		var zero LocalTime
-		result := zero.MinusHours(5)
-		assert.True(t, result.IsZero())
-	})
-}
-
-func TestLocalTime_MinusMinutes(t *testing.T) {
-	t.Run("subtract positive minutes", func(t *testing.T) {
-		// Normal subtraction
-		lt := MustLocalTimeOf(10, 45, 45, 123456789)
-		result := lt.MinusMinutes(15)
-		assert.Equal(t, MustLocalTimeOf(10, 30, 45, 123456789), result)
-
-		// Subtract minutes that roll back to previous hour
-		lt = MustLocalTimeOf(15, 10, 0, 0)
-		result = lt.MinusMinutes(20)
-		assert.Equal(t, MustLocalTimeOf(14, 50, 0, 0), result)
-	})
-
-	t.Run("wrap backwards past midnight", func(t *testing.T) {
-		// 00:10 - 20 minutes = 23:50
-		lt := MustLocalTimeOf(0, 10, 0, 0)
-		result := lt.MinusMinutes(20)
-		assert.Equal(t, MustLocalTimeOf(23, 50, 0, 0), result)
-	})
-
-	t.Run("equivalence with PlusMinutes", func(t *testing.T) {
-		lt := MustLocalTimeOf(10, 30, 45, 123456789)
-
-		// MinusMinutes(30) should equal PlusMinutes(-30)
-		result1 := lt.MinusMinutes(30)
-		result2 := lt.PlusMinutes(-30)
-		assert.Equal(t, result1, result2)
-	})
-
-	t.Run("zero value", func(t *testing.T) {
-		var zero LocalTime
-		result := zero.MinusMinutes(30)
-		assert.True(t, result.IsZero())
-	})
-}
-
-func TestLocalTime_MinusSeconds(t *testing.T) {
-	t.Run("subtract positive seconds", func(t *testing.T) {
-		// Normal subtraction
-		lt := MustLocalTimeOf(10, 30, 55, 123456789)
-		result := lt.MinusSeconds(10)
-		assert.Equal(t, MustLocalTimeOf(10, 30, 45, 123456789), result)
-
-		// Subtract seconds that roll back to previous minute
-		lt = MustLocalTimeOf(14, 31, 10, 0)
-		result = lt.MinusSeconds(20)
-		assert.Equal(t, MustLocalTimeOf(14, 30, 50, 0), result)
-	})
-
-	t.Run("wrap backwards past midnight", func(t *testing.T) {
-		// 00:00:10 - 20 seconds = 23:59:50
-		lt := MustLocalTimeOf(0, 0, 10, 0)
-		result := lt.MinusSeconds(20)
-		assert.Equal(t, MustLocalTimeOf(23, 59, 50, 0), result)
-	})
-
-	t.Run("equivalence with PlusSeconds", func(t *testing.T) {
-		lt := MustLocalTimeOf(10, 30, 45, 123456789)
-
-		// MinusSeconds(45) should equal PlusSeconds(-45)
-		result1 := lt.MinusSeconds(45)
-		result2 := lt.PlusSeconds(-45)
-		assert.Equal(t, result1, result2)
-	})
-
-	t.Run("zero value", func(t *testing.T) {
-		var zero LocalTime
-		result := zero.MinusSeconds(30)
-		assert.True(t, result.IsZero())
-	})
-}
-
-func TestLocalTime_MinusNanos(t *testing.T) {
-	t.Run("subtract positive nanoseconds", func(t *testing.T) {
-		// Normal subtraction
-		lt := MustLocalTimeOf(10, 30, 45, 123456889)
-		result := lt.MinusNanos(100)
-		assert.Equal(t, MustLocalTimeOf(10, 30, 45, 123456789), result)
-
-		// Subtract nanoseconds that roll back to previous second
-		lt = MustLocalTimeOf(14, 30, 51, 0)
-		result = lt.MinusNanos(1)
-		assert.Equal(t, MustLocalTimeOf(14, 30, 50, 999999999), result)
-	})
-
-	t.Run("wrap backwards past midnight", func(t *testing.T) {
-		// 00:00:00.0 - 1 nanosecond = 23:59:59.999999999
-		lt := MustLocalTimeOf(0, 0, 0, 0)
-		result := lt.MinusNanos(1)
-		assert.Equal(t, MustLocalTimeOf(23, 59, 59, 999999999), result)
-	})
-
-	t.Run("equivalence with PlusNanos", func(t *testing.T) {
-		lt := MustLocalTimeOf(10, 30, 45, 123456789)
-
-		// MinusNanos(1000) should equal PlusNanos(-1000)
-		result1 := lt.MinusNanos(1000)
-		result2 := lt.PlusNanos(-1000)
-		assert.Equal(t, result1, result2)
-	})
-
-	t.Run("zero value", func(t *testing.T) {
-		var zero LocalTime
-		result := zero.MinusNanos(1000000)
-		assert.True(t, result.IsZero())
-	})
-}
-
-func TestLocalTime_PlusMinusCombinations(t *testing.T) {
-	t.Run("plus and minus cancel out", func(t *testing.T) {
-		lt := MustLocalTimeOf(10, 30, 45, 123456789)
-
-		// Add then subtract same amount - should return to original
-		result := lt.PlusHours(5).MinusHours(5)
-		assert.Equal(t, lt, result)
-
-		result = lt.PlusMinutes(100).MinusMinutes(100)
-		assert.Equal(t, lt, result)
-
-		result = lt.PlusSeconds(500).MinusSeconds(500)
-		assert.Equal(t, lt, result)
-
-		result = lt.PlusNanos(1000000000).MinusNanos(1000000000)
-		assert.Equal(t, lt, result)
-	})
-
-	t.Run("complex chaining", func(t *testing.T) {
-		lt := MustLocalTimeOf(12, 0, 0, 0)
-
-		// Complex chain: +3h -1h +30m -15m +45s -30s
-		result := lt.PlusHours(3).MinusHours(1).PlusMinutes(30).MinusMinutes(15).PlusSeconds(45).MinusSeconds(30)
-		// Net: +2h +15m +15s = 14:15:15
-		expected := MustLocalTimeOf(14, 15, 15, 0)
-		assert.Equal(t, expected, result)
-	})
-}
-
 func TestLocalTimeOfNanoOfDay(t *testing.T) {
 	t.Run("valid nano of day", func(t *testing.T) {
 		// Midnight (0 nanoseconds)
@@ -1291,7 +854,7 @@ func TestLocalTimeOfNanoOfDay(t *testing.T) {
 		_, err := LocalTimeOfNanoOfDay(-1)
 		assert.Error(t, err)
 
-		// Value >= 24 hours in nanoseconds
+		// value >= 24 hours in nanoseconds
 		_, err = LocalTimeOfNanoOfDay(24 * int64(time.Hour))
 		assert.Error(t, err)
 
@@ -1364,7 +927,7 @@ func TestLocalTimeOfSecondOfDay(t *testing.T) {
 		_, err := LocalTimeOfSecondOfDay(-1)
 		assert.Error(t, err)
 
-		// Value >= 24 hours in seconds (86,400)
+		// value >= 24 hours in seconds (86,400)
 		_, err = LocalTimeOfSecondOfDay(86400)
 		assert.Error(t, err)
 
@@ -1394,7 +957,7 @@ func TestLocalTimeOfSecondOfDay(t *testing.T) {
 		require.NoError(t, err)
 
 		// Nanoseconds should be 0
-		assert.Equal(t, 0, lt.Nanosecond())
+		assert.Equal(t, 0, lt.Nano())
 	})
 }
 
@@ -1584,30 +1147,9 @@ func TestLocalTime_WithTemporal(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := tt.base.WithField(tt.field, TemporalValue{v: tt.value})
-			require.NoError(t, err)
-			assert.Equal(t, tt.want, got, "want %s got %s", tt.want, got)
+			r := tt.base.Chain().WithField(tt.field, TemporalValue{v: tt.value})
+			require.NoError(t, r.Error)
+			assert.Equal(t, tt.want, r.MustGet(), "want %s got %s", tt.want, r.MustGet())
 		})
 	}
-}
-
-func TestLocalTime_WithTemporal_errors(t *testing.T) {
-	t.Run("zero value returns zero", func(t *testing.T) {
-		var zero LocalTime
-		got, err := zero.WithField(FieldHourOfDay, TemporalValue{v: 5})
-		require.NoError(t, err)
-		assert.True(t, got.IsZero())
-	})
-
-	t.Run("invalid range", func(t *testing.T) {
-		base := MustLocalTimeOf(10, 0, 0, 0)
-		_, err := base.WithField(FieldSecondOfMinute, TemporalValue{v: 99})
-		assert.Error(t, err)
-	})
-
-	t.Run("unsupported field", func(t *testing.T) {
-		base := MustLocalTimeOf(10, 0, 0, 0)
-		_, err := base.WithField(FieldDayOfMonth, TemporalValue{v: 10})
-		assert.Error(t, err)
-	})
 }

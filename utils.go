@@ -3,6 +3,7 @@ package goda
 import (
 	"cmp"
 	"encoding"
+	"math"
 	"strconv"
 )
 
@@ -116,4 +117,16 @@ func checkInRange(field string, from, to, value int64) (e error) {
 		return newError("%s out of range: %d", field, value)
 	}
 	return nil
+}
+
+func addExactly(x, y int64) (r int64, overflow bool) {
+	r = x + y
+	overflow = ((x ^ r) & (y ^ r)) < 0
+	return
+}
+
+func mulExact(x, y int64) (r int64, overflow bool) {
+	r = x * y
+	overflow = ((y != 0) && (r/y != x)) || (x == math.MinInt64 && y == -1)
+	return
 }

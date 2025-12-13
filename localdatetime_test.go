@@ -182,61 +182,6 @@ func TestLocalDateTime_IsBefore_IsAfter(t *testing.T) {
 	assert.True(t, dt3.IsAfter(dt1))
 }
 
-func TestLocalDateTime_PlusDays(t *testing.T) {
-	dt := MustLocalDateTimeOf(2024, March, 15, 14, 30, 45, 0)
-
-	dt2 := dt.PlusDays(10)
-	assert.Equal(t, Year(2024), dt2.Year())
-	assert.Equal(t, March, dt2.Month())
-	assert.Equal(t, 25, dt2.DayOfMonth())
-	assert.Equal(t, 14, dt2.Hour())
-	assert.Equal(t, 30, dt2.Minute())
-
-	dt3 := dt.PlusDays(-10)
-	assert.Equal(t, 5, dt3.DayOfMonth())
-}
-
-func TestLocalDateTime_MinusDays(t *testing.T) {
-	dt := MustLocalDateTimeOf(2024, March, 15, 14, 30, 45, 0)
-
-	dt2 := dt.MinusDays(10)
-	assert.Equal(t, 5, dt2.DayOfMonth())
-	assert.Equal(t, 14, dt2.Hour())
-}
-
-func TestLocalDateTime_PlusMonths(t *testing.T) {
-	dt := MustLocalDateTimeOf(2024, January, 31, 14, 30, 45, 0)
-
-	dt2 := dt.PlusMonths(1)
-	assert.Equal(t, February, dt2.Month())
-	assert.Equal(t, 29, dt2.DayOfMonth()) // 2024 is leap year
-	assert.Equal(t, 14, dt2.Hour())
-}
-
-func TestLocalDateTime_MinusMonths(t *testing.T) {
-	dt := MustLocalDateTimeOf(2024, March, 15, 14, 30, 45, 0)
-
-	dt2 := dt.MinusMonths(1)
-	assert.Equal(t, February, dt2.Month())
-	assert.Equal(t, 15, dt2.DayOfMonth())
-}
-
-func TestLocalDateTime_PlusYears(t *testing.T) {
-	dt := MustLocalDateTimeOf(2024, February, 29, 14, 30, 45, 0)
-
-	dt2 := dt.PlusYears(1)
-	assert.Equal(t, Year(2025), dt2.Year())
-	assert.Equal(t, February, dt2.Month())
-	assert.Equal(t, 28, dt2.DayOfMonth()) // 2025 is not leap year
-}
-
-func TestLocalDateTime_MinusYears(t *testing.T) {
-	dt := MustLocalDateTimeOf(2024, March, 15, 14, 30, 45, 0)
-
-	dt2 := dt.MinusYears(1)
-	assert.Equal(t, Year(2023), dt2.Year())
-}
-
 func TestLocalDateTime_String(t *testing.T) {
 	tests := []struct {
 		name     string
@@ -520,7 +465,7 @@ func TestLocalDateTime_WithField_JavaMatch(t *testing.T) {
 				}
 				t.Run(field.String(), func(t *testing.T) {
 					var ndt LocalDateTime
-					ndt, e = dt.WithField(field, TemporalValueOf(1))
+					ndt, e = dt.Chain().WithField(field, TemporalValueOf(1)).GetResult()
 					if e != nil {
 						t.Fatal(e)
 					}
@@ -535,7 +480,7 @@ func TestLocalDateTime_WithField_JavaMatch(t *testing.T) {
 					if fmt.Sprint(nv) != v {
 						panic("invalid value: " + v)
 					}
-					ndt, e = ndt.WithField(field, TemporalValueOf(nv))
+					ndt, e = ndt.Chain().WithField(field, TemporalValueOf(nv)).GetResult()
 					if e != nil {
 						t.Fatal(e)
 					}

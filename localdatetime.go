@@ -94,7 +94,7 @@ func (dt LocalDateTime) Millisecond() int {
 
 // Nanosecond returns the nanosecond component (0-999999999).
 func (dt LocalDateTime) Nanosecond() int {
-	return dt.time.Nanosecond()
+	return dt.time.Nano()
 }
 
 // IsZero returns true if this is the zero value.
@@ -183,151 +183,14 @@ func (dt LocalDateTime) IsAfter(other LocalDateTime) bool {
 	return dt.Compare(other) > 0
 }
 
-// PlusDays returns a copy with the specified number of days added.
-func (dt LocalDateTime) PlusDays(days int) LocalDateTime {
-	return dt.date.PlusDays(days).AtTime(dt.time)
+func (dt LocalDateTime) Chain() (chain LocalDateTimeChain) {
+	chain.value = dt
+	return
 }
 
-// MinusDays returns a copy with the specified number of days subtracted.
-func (dt LocalDateTime) MinusDays(days int) LocalDateTime {
-	return dt.PlusDays(-days)
-}
-
-// PlusMonths returns a copy with the specified number of months added.
-func (dt LocalDateTime) PlusMonths(months int) LocalDateTime {
-	return dt.date.PlusMonths(months).AtTime(dt.time)
-}
-
-// MinusMonths returns a copy with the specified number of months subtracted.
-func (dt LocalDateTime) MinusMonths(months int) LocalDateTime {
-	return dt.PlusMonths(-months)
-}
-
-// PlusYears returns a copy with the specified number of years added.
-func (dt LocalDateTime) PlusYears(years int) LocalDateTime {
-	return dt.date.PlusYears(years).AtTime(dt.time)
-}
-
-// MinusYears returns a copy with the specified number of years subtracted.
-func (dt LocalDateTime) MinusYears(years int) LocalDateTime {
-	return dt.PlusYears(-years)
-}
-
-// String returns the ISO 8601 string representation (yyyy-MM-ddTHH:mm:ss[.nnnnnnnnn]).
-func (dt LocalDateTime) String() string {
-	return stringImpl(dt)
-}
-
-// AppendText implements encoding.TextAppender.
-func (dt LocalDateTime) AppendText(b []byte) ([]byte, error) {
-	if dt.IsZero() {
-		return b, nil
-	}
-	b, _ = dt.date.AppendText(b)
-	b = append(b, 'T')
-	b, _ = dt.time.AppendText(b)
-	return b, nil
-}
-
-// MarshalText implements encoding.TextMarshaler.
-func (dt LocalDateTime) MarshalText() ([]byte, error) {
-	return marshalTextImpl(dt)
-}
-
-// UnmarshalText implements encoding.TextUnmarshaler.
-// Accepts ISO 8601 format: yyyy-MM-ddTHH:mm:ss[.nnnnnnnnn]
-func (dt *LocalDateTime) UnmarshalText(text []byte) error {
-	if len(text) == 0 {
-		*dt = LocalDateTime{}
-		return nil
-	}
-
-	// Find the 'T' separator
-	sepIdx := -1
-	for i, ch := range text {
-		if ch == 'T' || ch == 't' || ch == ' ' {
-			sepIdx = i
-			break
-		}
-	}
-
-	if sepIdx < 0 {
-		return newError("invalid date-time format: missing 'T' separator")
-	}
-
-	// Parse date part
-	var date LocalDate
-	if err := date.UnmarshalText(text[:sepIdx]); err != nil {
-		return err
-	}
-
-	// Parse time part
-	var timePart LocalTime
-	if err := timePart.UnmarshalText(text[sepIdx+1:]); err != nil {
-		return err
-	}
-
-	*dt = date.AtTime(timePart)
-	return nil
-}
-
-// MarshalJSON implements json.Marshaler.
-func (dt LocalDateTime) MarshalJSON() ([]byte, error) {
-	return marshalJsonImpl(dt)
-}
-
-// UnmarshalJSON implements json.Unmarshaler.
-func (dt *LocalDateTime) UnmarshalJSON(data []byte) error {
-	if len(data) == 4 && string(data) == "null" {
-		*dt = LocalDateTime{}
-		return nil
-	}
-	return unmarshalJsonImpl(dt, data)
-}
-
-// Scan implements sql.Scanner.
-func (dt *LocalDateTime) Scan(src any) error {
-	switch v := src.(type) {
-	case nil:
-		*dt = LocalDateTime{}
-		return nil
-	case string:
-		return dt.UnmarshalText([]byte(v))
-	case []byte:
-		return dt.UnmarshalText(v)
-	case time.Time:
-		*dt = LocalDateTimeOfGoTime(v)
-		return nil
-	default:
-		return sqlScannerDefaultBranch(v)
-	}
-}
-
-// Value implements driver.Valuer.
-func (dt LocalDateTime) Value() (driver.Value, error) {
-	if dt.IsZero() {
-		return nil, nil
-	}
-	return dt.String(), nil
-}
-
-func (dt LocalDateTime) WithField(field Field, value TemporalValue) (r LocalDateTime, e error) {
-	if dt.IsZero() {
-		return
-	}
-	if dt.date.IsSupportedField(field) {
-		r.date, e = dt.date.WithField(field, value)
-		if e != nil {
-			return
-		}
-		r.time = dt.time
-	} else {
-		r.time, e = dt.time.WithField(field, value)
-		if e != nil {
-			return
-		}
-		r.date = dt.date
-	}
+func (dt LocalDateTime) chainWithError(e error) (chain LocalDateTimeChain) {
+	chain = dt.Chain()
+	chain.Error = e
 	return
 }
 

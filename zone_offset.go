@@ -159,7 +159,7 @@ func (z *ZoneOffset) UnmarshalText(text []byte) error {
 		return newError("zone offset has no digits after sign")
 	}
 
-	// Check for colon-separated format
+	// check for colon-separated format
 	hasColon := false
 	for i := 0; i < len(s); i++ {
 		if s[i] == ':' {

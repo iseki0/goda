@@ -39,9 +39,9 @@ func Example() {
 	fmt.Println("Parsed OffsetDateTime:", parsedOffsetDateTime)
 
 	// LocalDate arithmetic
-	tomorrow := date.PlusDays(1)
-	nextMonth := date.PlusMonths(1)
-	nextYear := date.PlusYears(1)
+	tomorrow := date.Chain().PlusDays(1).MustGet()
+	nextMonth := date.Chain().PlusMonths(1).MustGet()
+	nextYear := date.Chain().PlusYears(1).MustGet()
 
 	fmt.Println("Tomorrow:", tomorrow)
 	fmt.Println("Next month:", nextMonth)
@@ -83,7 +83,7 @@ func ExampleLocalDateNow() {
 	// Get current date in local timezone
 	today := goda.LocalDateNow()
 
-	// Check that we got a valid date
+	// check that we got a valid date
 	fmt.Printf("Got valid date: %v\n", !today.IsZero())
 	fmt.Printf("Has year component: %v\n", today.Year() != 0)
 
@@ -181,12 +181,12 @@ func ExampleLocalDateOfGoTime() {
 	// 2024-03-15
 }
 
-// ExampleLocalDate_PlusDays demonstrates adding days to a date.
-func ExampleLocalDate_PlusDays() {
+// ExampleLocalDateChain_PlusDays demonstrates adding days to a date.
+func ExampleLocalDateChain_PlusDays() {
 	date := goda.MustLocalDateOf(2024, goda.January, 15)
 	fmt.Println("Original:", date)
-	fmt.Println("Plus 10 days:", date.PlusDays(10))
-	fmt.Println("Minus 10 days:", date.PlusDays(-10))
+	fmt.Println("Plus 10 days:", date.Chain().PlusDays(10).MustGet())
+	fmt.Println("Minus 10 days:", date.Chain().PlusDays(-10).MustGet())
 
 	// Output:
 	// Original: 2024-01-15
@@ -194,12 +194,12 @@ func ExampleLocalDate_PlusDays() {
 	// Minus 10 days: 2024-01-05
 }
 
-// ExampleLocalDate_PlusMonths demonstrates adding months to a date.
-func ExampleLocalDate_PlusMonths() {
+// ExampleLocalDateChain_PlusMonths demonstrates adding months to a date.
+func ExampleLocalDateChain_PlusMonths() {
 	date := goda.MustLocalDateOf(2024, goda.January, 31)
 	fmt.Println("Original:", date)
-	fmt.Println("Plus 1 month:", date.PlusMonths(1))
-	fmt.Println("Plus 2 months:", date.PlusMonths(2))
+	fmt.Println("Plus 1 month:", date.Chain().PlusMonths(1).MustGet())
+	fmt.Println("Plus 2 months:", date.Chain().PlusMonths(2).MustGet())
 
 	// Output:
 	// Original: 2024-01-31
@@ -349,14 +349,14 @@ func ExampleLocalTime_hour() {
 	fmt.Println("Minute:", t.Minute())
 	fmt.Println("Second:", t.Second())
 	fmt.Println("Millisecond:", t.Millisecond())
-	fmt.Println("Nanosecond:", t.Nanosecond())
+	fmt.Println("Nano:", t.Nano())
 
 	// Output:
 	// Hour: 14
 	// Minute: 30
 	// Second: 45
 	// Millisecond: 123
-	// Nanosecond: 123456789
+	// Nano: 123456789
 }
 
 // ExampleLocalTime_Compare demonstrates comparing times.
@@ -579,10 +579,10 @@ func ExampleLocalDateTime_Compare() {
 	// dt3 > dt1: true
 }
 
-// ExampleLocalDateTime_PlusDays demonstrates adding days.
-func ExampleLocalDateTime_PlusDays() {
+// ExampleLocalDateTimeChain_PlusDays demonstrates adding days.
+func ExampleLocalDateTimeChain_PlusDays() {
 	dt := goda.MustLocalDateTimeParse("2024-03-15T14:30:45")
-	future := dt.PlusDays(10)
+	future := dt.Chain().PlusDays(10).MustGet()
 	fmt.Println(future)
 
 	// Output:
@@ -1329,11 +1329,11 @@ func ExampleZoneId_roundTrip() {
 }
 
 // ExampleLocalDate_PlusWeeks demonstrates adding weeks to a date.
-func ExampleLocalDate_PlusWeeks() {
+func ExampleLocalDateChain_PlusWeeks() {
 	date := goda.MustLocalDateOf(2024, goda.January, 15)
 	fmt.Println("Original:", date)
-	fmt.Println("Plus 2 weeks:", date.PlusWeeks(2))
-	fmt.Println("Minus 1 week:", date.PlusWeeks(-1))
+	fmt.Println("Plus 2 weeks:", date.Chain().PlusWeeks(2).MustGet())
+	fmt.Println("Minus 1 week:", date.Chain().PlusWeeks(-1).MustGet())
 
 	// Output:
 	// Original: 2024-01-15
@@ -1341,11 +1341,11 @@ func ExampleLocalDate_PlusWeeks() {
 	// Minus 1 week: 2024-01-08
 }
 
-// ExampleLocalDate_MinusWeeks demonstrates subtracting weeks from a date.
-func ExampleLocalDate_MinusWeeks() {
+// ExampleLocalDateChain_MinusWeeks demonstrates subtracting weeks from a date.
+func ExampleLocalDateChain_MinusWeeks() {
 	date := goda.MustLocalDateOf(2024, goda.February, 15)
 	fmt.Println("Original:", date)
-	fmt.Println("Minus 2 weeks:", date.MinusWeeks(2))
+	fmt.Println("Minus 2 weeks:", date.Chain().MinusWeeks(2).MustGet())
 
 	// Output:
 	// Original: 2024-02-15
