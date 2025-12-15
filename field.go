@@ -152,7 +152,7 @@ var fieldDescriptors = []fieldDescriptor{
 	FieldProlepticMonth:          {name: "ProlepticMonth", javaName: "PROLEPTIC_MONTH", based: dateBased, fieldRange: makeRange(YearMin*12, YearMax*12+11)},
 	FieldYearOfEra:               {name: "YearOfEra", javaName: "YEAR_OF_ERA", based: dateBased, fieldRange: makeRange(1, math.MaxInt64)},
 	FieldYear:                    {name: "Year", javaName: "YEAR", based: dateBased, fieldRange: makeRange(YearMin, YearMax)},
-	FieldEra:                     {name: "Era", javaName: "ERA", based: dateBased, fieldRange: makeRange(1, 2)},
+	FieldEra:                     {name: "Era", javaName: "ERA", based: dateBased, fieldRange: makeRange(0, 1)},
 	FieldInstantSeconds:          {name: "InstantSeconds", javaName: "INSTANT_SECONDS", fieldRange: makeRange(math.MinInt64, math.MaxInt64)},
 	FieldOffsetSeconds:           {name: "OffsetSeconds", javaName: "OFFSET_SECONDS", fieldRange: makeRange(-18*3600, 18*3600)},
 }

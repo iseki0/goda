@@ -189,7 +189,7 @@ func (l LocalDateChain) WithField(field Field, value TemporalValue) LocalDateCha
 	case FieldProlepticMonth:
 		return l.PlusMonths(newValue - l.value.GetField(FieldProlepticMonth).Int64())
 	case FieldYearOfEra:
-		if newValue >= 1 {
+		if l.value.Year() >= 1 {
 			return l.WithYear(Year(newValue))
 		}
 		return l.WithYear(Year(1 - newValue))
@@ -199,7 +199,7 @@ func (l LocalDateChain) WithField(field Field, value TemporalValue) LocalDateCha
 		if l.value.GetField(FieldEra).Int64() == newValue {
 			return l
 		}
-		return l.WithYear(Year(1 - newValue))
+		return l.WithYear(1 - l.value.Year())
 	default:
 		l.eError = unsupportedField(field)
 	}

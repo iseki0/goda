@@ -191,6 +191,12 @@ func (l LocalTimeChain) WithField(field Field, value TemporalValue) LocalTimeCha
 		return l.WithHour(int(newValue))
 	case FieldAmPmOfDay:
 		return l.PlusHours((newValue - int64(hour)/12) * 12)
+	case FieldClockHourOfAmPm:
+		var a = newValue
+		if newValue == 12 {
+			a = 0
+		}
+		return l.PlusHours(a - int64(l.value.Hour())%12)
 	default:
 		l.eError = unsupportedField(field)
 	}
