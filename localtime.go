@@ -246,7 +246,7 @@ func (t LocalTime) Chain() (chain LocalTimeChain) {
 
 func (t LocalTime) chainWithError(e error) (chain LocalTimeChain) {
 	chain = t.Chain()
-	chain.Error = e
+	chain.eError = e
 	return
 }
 

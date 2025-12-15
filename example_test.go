@@ -157,7 +157,7 @@ func ExampleLocalDateOf() {
 
 	// Output:
 	// 2024-01-15
-	// Error: goda: day 30 of month out of range
+	// Error: goda: invalid date February 30
 }
 
 // ExampleMustNewLocalDate demonstrates how to create a date that panics on error.
@@ -313,7 +313,7 @@ func ExampleLocalTimeOf() {
 
 	// Output:
 	// 14:30:45.123456789
-	// Error: goda: hour 25 out of range
+	// Error: goda: invalid value of HourOfDay (valid range 0 - 23): 25
 }
 
 // ExampleMustLocalTimeOf demonstrates how to create a time that panics on error.
@@ -1004,50 +1004,6 @@ func ExampleOffsetDateTimeNow() {
 	// UTC offset: 0 seconds
 }
 
-// ExampleOffsetDateTime_WithOffsetSameLocal demonstrates changing offset while keeping local time.
-func ExampleOffsetDateTime_WithOffsetSameLocal() {
-	est := goda.MustZoneOffsetOfHours(-5) // EST
-	pst := goda.MustZoneOffsetOfHours(-8) // PST
-
-	// Create a time in EST
-	odtEST := goda.MustOffsetDateTimeOf(2024, goda.March, 15, 14, 30, 45, 0, est)
-	fmt.Println("Original (EST):", odtEST)
-
-	// Change to PST offset, but keep the local time (14:30:45)
-	odtPST := odtEST.WithOffsetSameLocal(pst)
-	fmt.Println("Same local (PST):", odtPST)
-
-	// Note: These represent different instants in time!
-	fmt.Printf("Different instants: %v\n", odtEST.EpochSecond() != odtPST.EpochSecond())
-
-	// Output:
-	// Original (EST): 2024-03-15T14:30:45-05:00
-	// Same local (PST): 2024-03-15T14:30:45-08:00
-	// Different instants: true
-}
-
-// ExampleOffsetDateTime_WithOffsetSameInstant demonstrates changing offset while preserving instant.
-func ExampleOffsetDateTime_WithOffsetSameInstant() {
-	est := goda.MustZoneOffsetOfHours(-5) // EST
-	pst := goda.MustZoneOffsetOfHours(-8) // PST
-
-	// Create a time in EST
-	odtEST := goda.MustOffsetDateTimeOf(2024, goda.March, 15, 14, 30, 45, 0, est)
-	fmt.Println("Original (EST):", odtEST)
-
-	// Change to PST offset, but preserve the instant (same moment in time)
-	odtPST := odtEST.WithOffsetSameInstant(pst)
-	fmt.Println("Same instant (PST):", odtPST)
-
-	// The local time is adjusted: 14:30 EST = 11:30 PST
-	fmt.Printf("Same instant: %v\n", odtEST.EpochSecond() == odtPST.EpochSecond())
-
-	// Output:
-	// Original (EST): 2024-03-15T14:30:45-05:00
-	// Same instant (PST): 2024-03-15T11:30:45-08:00
-	// Same instant: true
-}
-
 // ExampleOffsetDateTime_Compare demonstrates comparing offset date-times.
 func ExampleOffsetDateTime_Compare() {
 	// These represent the same instant in time
@@ -1068,16 +1024,16 @@ func ExampleOffsetDateTime_Compare() {
 	// odt3 is later
 }
 
-// ExampleOffsetDateTime_PlusHours demonstrates time arithmetic with hours.
-func ExampleOffsetDateTime_PlusHours() {
+// ExampleOffsetDateTimeChain_PlusHours demonstrates time arithmetic with hours.
+func ExampleOffsetDateTimeChain_PlusHours() {
 	odt := goda.MustOffsetDateTimeParse("2024-03-15T14:30:45+08:00")
 
 	// Add hours
-	later := odt.PlusHours(5)
+	later := odt.Chain().PlusHours(5).MustGet()
 	fmt.Println("5 hours later:", later)
 
 	// Subtract hours
-	earlier := odt.MinusHours(2)
+	earlier := odt.Chain().MinusHours(2).MustGet()
 	fmt.Println("2 hours earlier:", earlier)
 
 	// Output:
@@ -1352,12 +1308,12 @@ func ExampleLocalDateChain_MinusWeeks() {
 	// Minus 2 weeks: 2024-02-01
 }
 
-// ExampleLocalDate_WithDayOfMonth demonstrates changing the day of month.
-func ExampleLocalDate_WithDayOfMonth() {
+// ExampleLocalDateChain_WithDayOfMonth demonstrates changing the day of month.
+func ExampleLocalDateChain_WithDayOfMonth() {
 	date := goda.MustLocalDateOf(2024, goda.March, 15)
 
 	// Change to the 1st of the month
-	date2, err := date.WithDayOfMonth(1)
+	date2, err := date.Chain().WithDayOfMonth(1).GetResult()
 	if err != nil {
 		fmt.Println("Error:", err)
 		return
@@ -1365,7 +1321,7 @@ func ExampleLocalDate_WithDayOfMonth() {
 	fmt.Println("First of month:", date2)
 
 	// Change to the last day of the month
-	date3, err := date.WithDayOfMonth(31)
+	date3, err := date.Chain().WithDayOfMonth(31).GetResult()
 	if err != nil {
 		fmt.Println("Error:", err)
 		return
@@ -1377,25 +1333,13 @@ func ExampleLocalDate_WithDayOfMonth() {
 	// Last of month: 2024-03-31
 }
 
-// ExampleLocalDate_MustWithDayOfMonth demonstrates changing the day of month (panic version).
-func ExampleLocalDate_MustWithDayOfMonth() {
-	date := goda.MustLocalDateOf(2024, goda.March, 15)
-
-	// Change to the 20th
-	date2 := date.MustWithDayOfMonth(20)
-	fmt.Println(date2)
-
-	// Output:
-	// 2024-03-20
-}
-
-// ExampleLocalDate_WithDayOfYear demonstrates changing the day of year.
-func ExampleLocalDate_WithDayOfYear() {
+// ExampleLocalDateChain_WithDayOfYear demonstrates changing the day of year.
+func ExampleLocalDateChain_WithDayOfYear() {
 	date := goda.MustLocalDateOf(2024, goda.March, 15)
 	fmt.Println("Original:", date)
 
 	// Change to the 100th day of the year
-	date2, err := date.WithDayOfYear(100)
+	date2, err := date.Chain().WithDayOfYear(100).GetResult()
 	if err != nil {
 		fmt.Println("Error:", err)
 		return
@@ -1403,7 +1347,7 @@ func ExampleLocalDate_WithDayOfYear() {
 	fmt.Println("Day 100:", date2)
 
 	// Change to the 1st day of the year
-	date3, err := date.WithDayOfYear(1)
+	date3, err := date.Chain().WithDayOfYear(1).GetResult()
 	if err != nil {
 		fmt.Println("Error:", err)
 		return
@@ -1416,25 +1360,13 @@ func ExampleLocalDate_WithDayOfYear() {
 	// Day 1: 2024-01-01
 }
 
-// ExampleLocalDate_MustWithDayOfYear demonstrates changing the day of year (panic version).
-func ExampleLocalDate_MustWithDayOfYear() {
-	date := goda.MustLocalDateOf(2024, goda.June, 15)
-
-	// Change to the 200th day of the year
-	date2 := date.MustWithDayOfYear(200)
-	fmt.Println(date2)
-
-	// Output:
-	// 2024-07-18
-}
-
-// ExampleLocalDate_WithMonth demonstrates changing the month.
-func ExampleLocalDate_WithMonth() {
+// ExampleLocalDateChain_WithMonth demonstrates changing the month.
+func ExampleLocalDateChain_WithMonth() {
 	date := goda.MustLocalDateOf(2024, goda.January, 31)
 	fmt.Println("Original:", date)
 
 	// Change to February (day will be clamped to 29 in leap year)
-	date2, err := date.WithMonth(goda.February)
+	date2, err := date.Chain().WithMonth(goda.February).GetResult()
 	if err != nil {
 		fmt.Println("Error:", err)
 		return
@@ -1442,7 +1374,7 @@ func ExampleLocalDate_WithMonth() {
 	fmt.Println("February:", date2)
 
 	// Change to March (day 31 is valid)
-	date3, err := date.WithMonth(goda.March)
+	date3, err := date.Chain().WithMonth(goda.March).GetResult()
 	if err != nil {
 		fmt.Println("Error:", err)
 		return
@@ -1455,26 +1387,14 @@ func ExampleLocalDate_WithMonth() {
 	// March: 2024-03-31
 }
 
-// ExampleLocalDate_MustWithMonth demonstrates changing the month (panic version).
-func ExampleLocalDate_MustWithMonth() {
-	date := goda.MustLocalDateOf(2024, goda.January, 15)
-
-	// Change to June
-	date2 := date.MustWithMonth(goda.June)
-	fmt.Println(date2)
-
-	// Output:
-	// 2024-06-15
-}
-
-// ExampleLocalDate_WithYear demonstrates changing the year.
-func ExampleLocalDate_WithYear() {
+// ExampleLocalDateChain_WithYear demonstrates changing the year.
+func ExampleLocalDateChain_WithYear() {
 	// Leap year date (Feb 29)
 	date := goda.MustLocalDateOf(2024, goda.February, 29)
 	fmt.Println("Original (leap year):", date)
 
 	// Change to non-leap year (day will be clamped to 28)
-	date2, err := date.WithYear(2023)
+	date2, err := date.Chain().WithYear(2023).GetResult()
 	if err != nil {
 		fmt.Println("Error:", err)
 		return
@@ -1482,7 +1402,7 @@ func ExampleLocalDate_WithYear() {
 	fmt.Println("Non-leap year:", date2)
 
 	// Change to another leap year (day 29 is valid)
-	date3, err := date.WithYear(2020)
+	date3, err := date.Chain().WithYear(2020).GetResult()
 	if err != nil {
 		fmt.Println("Error:", err)
 		return
@@ -1493,18 +1413,6 @@ func ExampleLocalDate_WithYear() {
 	// Original (leap year): 2024-02-29
 	// Non-leap year: 2023-02-28
 	// Another leap year: 2020-02-29
-}
-
-// ExampleLocalDate_MustWithYear demonstrates changing the year (panic version).
-func ExampleLocalDate_MustWithYear() {
-	date := goda.MustLocalDateOf(2024, goda.March, 15)
-
-	// Change to 2025
-	date2 := date.MustWithYear(2025)
-	fmt.Println(date2)
-
-	// Output:
-	// 2025-03-15
 }
 
 // ExampleLocalDate_LengthOfMonth demonstrates getting the month length.
@@ -1557,13 +1465,13 @@ func ExampleLocalDate_LengthOfYear() {
 	// Year 1900: 365 days
 }
 
-// ExampleLocalTime_WithField demonstrates mutating LocalTime components using WithField.
-func ExampleLocalTime_WithField() {
+// ExampleLocalTimeChain_WithField demonstrates mutating LocalTime components using WithField.
+func ExampleLocalTimeChain_WithField() {
 	morning := goda.MustLocalTimeOf(7, 30, 45, 123000000)
 
-	toEvening, _ := morning.WithField(goda.FieldAmPmOfDay, goda.TemporalValueOf(1))
-	withDifferentNanos, _ := morning.WithField(goda.FieldNanoOfSecond, goda.TemporalValueOf(987654321))
-	exactTime, _ := morning.WithField(goda.FieldNanoOfDay, goda.TemporalValueOf(int64(22*time.Hour+1*time.Minute)))
+	toEvening, _ := morning.Chain().WithField(goda.FieldAmPmOfDay, goda.TemporalValueOf(1)).GetResult()
+	withDifferentNanos, _ := morning.Chain().WithField(goda.FieldNanoOfSecond, goda.TemporalValueOf(987654321)).GetResult()
+	exactTime, _ := morning.Chain().WithField(goda.FieldNanoOfDay, goda.TemporalValueOf(int64(22*time.Hour+1*time.Minute))).GetResult()
 
 	fmt.Println(toEvening)
 	fmt.Println(withDifferentNanos)

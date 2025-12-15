@@ -1,7 +1,6 @@
 package goda
 
 import (
-	"errors"
 	"math"
 	"strconv"
 )
@@ -142,25 +141,25 @@ var fieldDescriptors = []fieldDescriptor{
 	FieldClockHourOfDay:          {name: "ClockHourOfDay", javaName: "CLOCK_HOUR_OF_DAY", based: timeBased, fieldRange: makeRange(1, 24)},
 	FieldAmPmOfDay:               {name: "AmPmOfDay", javaName: "AMPM_OF_DAY", based: timeBased, fieldRange: makeRange(0, 1)},
 	FieldDayOfWeek:               {name: "DayOfWeek", javaName: "DAY_OF_WEEK", based: dateBased, fieldRange: makeRange(1, 7)},
-	FieldAlignedDayOfWeekInMonth: {name: "AlignedDayOfWeekInMonth", javaName: "ALIGNED_DAY_OF_WEEK_IN_MONTH", based: dateBased},
-	FieldAlignedDayOfWeekInYear:  {name: "AlignedDayOfWeekInYear", javaName: "ALIGNED_DAY_OF_WEEK_IN_YEAR", based: dateBased},
+	FieldAlignedDayOfWeekInMonth: {name: "AlignedDayOfWeekInMonth", javaName: "ALIGNED_DAY_OF_WEEK_IN_MONTH", based: dateBased, fieldRange: makeRange(1, 7)},
+	FieldAlignedDayOfWeekInYear:  {name: "AlignedDayOfWeekInYear", javaName: "ALIGNED_DAY_OF_WEEK_IN_YEAR", based: dateBased, fieldRange: makeRange(1, 7)},
 	FieldDayOfMonth:              {name: "DayOfMonth", javaName: "DAY_OF_MONTH", based: dateBased, fieldRange: makeRange(1, 31)},
 	FieldDayOfYear:               {name: "DayOfYear", javaName: "DAY_OF_YEAR", based: dateBased, fieldRange: makeRange(1, 366)},
-	FieldEpochDay:                {name: "EpochDay", javaName: "EPOCH_DAY", based: dateBased},
-	FieldAlignedWeekOfMonth:      {name: "AlignedWeekOfMonth", javaName: "ALIGNED_WEEK_OF_MONTH", based: dateBased},
-	FieldAlignedWeekOfYear:       {name: "AlignedWeekOfYear", javaName: "ALIGNED_WEEK_OF_YEAR", based: dateBased},
+	FieldEpochDay:                {name: "EpochDay", javaName: "EPOCH_DAY", based: dateBased, fieldRange: makeRange(math.MinInt64, math.MaxInt64)},
+	FieldAlignedWeekOfMonth:      {name: "AlignedWeekOfMonth", javaName: "ALIGNED_WEEK_OF_MONTH", based: dateBased, fieldRange: makeRange(1, 5)},
+	FieldAlignedWeekOfYear:       {name: "AlignedWeekOfYear", javaName: "ALIGNED_WEEK_OF_YEAR", based: dateBased, fieldRange: makeRange(1, 53)},
 	FieldMonthOfYear:             {name: "MonthOfYear", javaName: "MONTH_OF_YEAR", based: dateBased, fieldRange: makeRange(1, 12)},
 	FieldProlepticMonth:          {name: "ProlepticMonth", javaName: "PROLEPTIC_MONTH", based: dateBased, fieldRange: makeRange(YearMin*12, YearMax*12+11)},
 	FieldYearOfEra:               {name: "YearOfEra", javaName: "YEAR_OF_ERA", based: dateBased, fieldRange: makeRange(1, math.MaxInt64)},
 	FieldYear:                    {name: "Year", javaName: "YEAR", based: dateBased, fieldRange: makeRange(YearMin, YearMax)},
 	FieldEra:                     {name: "Era", javaName: "ERA", based: dateBased, fieldRange: makeRange(1, 2)},
-	FieldInstantSeconds:          {name: "InstantSeconds", javaName: "INSTANT_SECONDS"},
-	FieldOffsetSeconds:           {name: "OffsetSeconds", javaName: "OFFSET_SECONDS"},
+	FieldInstantSeconds:          {name: "InstantSeconds", javaName: "INSTANT_SECONDS", fieldRange: makeRange(math.MinInt64, math.MaxInt64)},
+	FieldOffsetSeconds:           {name: "OffsetSeconds", javaName: "OFFSET_SECONDS", fieldRange: makeRange(-18*3600, 18*3600)},
 }
 
 func (f Field) check(value int64) error {
 	if !f.Valid() {
-		return errors.New("goda: invalid field " + strconv.Itoa(int(f)))
+		return invalidFieldError(f)
 	}
 	var r = fieldDescriptors[f].fieldRange
 	if r.Valid && (value < r.Min || value > r.Max) {

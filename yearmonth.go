@@ -44,7 +44,7 @@ func (y YearMonth) Month() Month {
 	return Month(y.v & 0xffff)
 }
 
-func (y YearMonth) Chain() (chain YearMonthChained) {
+func (y YearMonth) Chain() (chain YearMonthChain) {
 	chain.value = y
 	return
 }

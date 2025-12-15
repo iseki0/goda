@@ -1148,7 +1148,7 @@ func TestLocalTime_WithTemporal(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			r := tt.base.Chain().WithField(tt.field, TemporalValue{v: tt.value})
-			require.NoError(t, r.Error)
+			require.NoError(t, r.eError)
 			assert.Equal(t, tt.want, r.MustGet(), "want %s got %s", tt.want, r.MustGet())
 		})
 	}

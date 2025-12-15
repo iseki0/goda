@@ -179,6 +179,11 @@ func (odt OffsetDateTime) IsAfter(other OffsetDateTime) bool {
 	return doCompare(odt, other, compareZero, comparing(OffsetDateTime.EpochSecond), comparing(OffsetDateTime.Nanosecond)) > 0
 }
 
+func (odt OffsetDateTime) Chain() (chain OffsetDateTimeChain) {
+	chain.value = odt
+	return
+}
+
 // OffsetDateTimeOf creates a new OffsetDateTime from individual components.
 // Returns an error if any component is invalid.
 func OffsetDateTimeOf(year Year, month Month, day int, hour int, minute int, second int, nanosecond int, offset ZoneOffset) (OffsetDateTime, error) {

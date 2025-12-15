@@ -5,22 +5,25 @@ type LocalTimeChain struct {
 }
 
 func (l LocalTimeChain) PlusHours(hours int64) LocalTimeChain {
+	defer l.leaveFunction(l.enterFunction("LocalTime", "PlusHours"))
 	if hours == 0 {
 		return l
 	}
 	if !l.ok() {
 		return l
 	}
-	newHour := (hours%24 + hours + 24) % 24
-	l.value, l.Error = LocalTimeOf(int(newHour), l.value.Minute(), l.value.Second(), l.value.Nano())
+	newHour := (hours%24 + int64(l.value.Hour()) + 24) % 24
+	l.value, l.eError = LocalTimeOf(int(newHour), l.value.Minute(), l.value.Second(), l.value.Nano())
 	return l
 }
 
 func (l LocalTimeChain) MinusHours(hoursToSubtract int64) LocalTimeChain {
+	defer l.leaveFunction(l.enterFunction("LocalTime", "MinusHours"))
 	return l.PlusHours(-(hoursToSubtract % 24))
 }
 
 func (l LocalTimeChain) PlusMinutes(minutesToAdd int64) LocalTimeChain {
+	defer l.leaveFunction(l.enterFunction("LocalTime", "PlusMinutes"))
 	if minutesToAdd == 0 {
 		return l
 	}
@@ -29,15 +32,17 @@ func (l LocalTimeChain) PlusMinutes(minutesToAdd int64) LocalTimeChain {
 	if mofd == newMofd {
 		return l
 	}
-	l.value, l.Error = LocalTimeOf(int(newMofd/60), int(newMofd%60), l.value.Second(), l.value.Nano())
+	l.value, l.eError = LocalTimeOf(int(newMofd/60), int(newMofd%60), l.value.Second(), l.value.Nano())
 	return l
 }
 
 func (l LocalTimeChain) MinusMinutes(minutesToSubtract int64) LocalTimeChain {
+	defer l.leaveFunction(l.enterFunction("LocalTime", "MinusMinutes"))
 	return l.PlusMinutes(-(minutesToSubtract % 1440))
 }
 
 func (l LocalTimeChain) PlusSeconds(secondsToAdd int64) LocalTimeChain {
+	defer l.leaveFunction(l.enterFunction("LocalTime", "PlusSeconds"))
 	if secondsToAdd == 0 {
 		return l
 	}
@@ -46,15 +51,17 @@ func (l LocalTimeChain) PlusSeconds(secondsToAdd int64) LocalTimeChain {
 	if sofd == newSofd {
 		return l
 	}
-	l.value, l.Error = LocalTimeOf(int(newSofd/3600), int(newSofd/60%60), int(newSofd%60), l.value.Nano())
+	l.value, l.eError = LocalTimeOf(int(newSofd/3600), int(newSofd/60%60), int(newSofd%60), l.value.Nano())
 	return l
 }
 
 func (l LocalTimeChain) MinusSeconds(secondsToSubtract int64) LocalTimeChain {
+	defer l.leaveFunction(l.enterFunction("LocalTime", "MinusSeconds"))
 	return l.PlusSeconds(-(secondsToSubtract % 86400))
 }
 
 func (l LocalTimeChain) PlusNano(nanosToAdd int64) LocalTimeChain {
+	defer l.leaveFunction(l.enterFunction("LocalTime", "PlusNano"))
 	if nanosToAdd == 0 {
 		return l
 	}
@@ -70,47 +77,52 @@ func (l LocalTimeChain) PlusNano(nanosToAdd int64) LocalTimeChain {
 	var newMinute = int((newNofd / NanosPerMinute) % 60)
 	var newSecond = int((newNofd / 1000_000_000) % 60)
 	var newNano = int(newNofd % 1000_000_000)
-	l.value, l.Error = LocalTimeOf(newHour, newMinute, newSecond, newNano)
+	l.value, l.eError = LocalTimeOf(newHour, newMinute, newSecond, newNano)
 	return l
 }
 
 func (l LocalTimeChain) MinusNano(nanosToSubtract int64) LocalTimeChain {
+	defer l.leaveFunction(l.enterFunction("LocalTime", "MinusNano"))
 	return l.PlusNano(-(nanosToSubtract % 86400_000_000_000))
 }
 
 func (l LocalTimeChain) WithNano(nanoOfSecond int) LocalTimeChain {
-	FieldNanoOfSecond.checkSetE(int64(nanoOfSecond), &l.Error)
+	defer l.leaveFunction(l.enterFunction("LocalTime", "WithNano"))
+	FieldNanoOfSecond.checkSetE(int64(nanoOfSecond), &l.eError)
 	if !l.ok() {
 		return l
 	}
-	l.value, l.Error = LocalTimeOf(l.value.Hour(), l.value.Minute(), l.value.Second(), nanoOfSecond)
+	l.value, l.eError = LocalTimeOf(l.value.Hour(), l.value.Minute(), l.value.Second(), nanoOfSecond)
 	return l
 }
 
 func (l LocalTimeChain) WithSecond(second int) LocalTimeChain {
-	FieldSecondOfMinute.checkSetE(int64(second), &l.Error)
+	defer l.leaveFunction(l.enterFunction("LocalTime", "WithSecond"))
+	FieldSecondOfMinute.checkSetE(int64(second), &l.eError)
 	if !l.ok() {
 		return l
 	}
-	l.value, l.Error = LocalTimeOf(l.value.Hour(), l.value.Minute(), second, l.value.Nano())
+	l.value, l.eError = LocalTimeOf(l.value.Hour(), l.value.Minute(), second, l.value.Nano())
 	return l
 }
 
 func (l LocalTimeChain) WithMinute(minute int) LocalTimeChain {
-	FieldMinuteOfHour.checkSetE(int64(minute), &l.Error)
+	defer l.leaveFunction(l.enterFunction("LocalTime", "WithMinute"))
+	FieldMinuteOfHour.checkSetE(int64(minute), &l.eError)
 	if !l.ok() {
 		return l
 	}
-	l.value, l.Error = LocalTimeOf(l.value.Hour(), minute, l.value.Second(), l.value.Nano())
+	l.value, l.eError = LocalTimeOf(l.value.Hour(), minute, l.value.Second(), l.value.Nano())
 	return l
 }
 
 func (l LocalTimeChain) WithHour(hour int) LocalTimeChain {
-	FieldHourOfDay.checkSetE(int64(hour), &l.Error)
+	defer l.leaveFunction(l.enterFunction("LocalTime", "WithHour"))
+	FieldHourOfDay.checkSetE(int64(hour), &l.eError)
 	if !l.ok() {
 		return l
 	}
-	l.value, l.Error = LocalTimeOf(hour, l.value.Minute(), l.value.Second(), l.value.Nano())
+	l.value, l.eError = LocalTimeOf(hour, l.value.Minute(), l.value.Second(), l.value.Nano())
 	return l
 }
 
@@ -136,7 +148,8 @@ func (l LocalTimeChain) WithHour(hour int) LocalTimeChain {
 //
 // Fields outside this list return an error. Range violations propagate the validation error.
 func (l LocalTimeChain) WithField(field Field, value TemporalValue) LocalTimeChain {
-	field.checkSetE(value.Int64(), &l.Error)
+	defer l.leaveFunction(l.enterFunction("LocalTime", "WithField"))
+	field.checkSetE(value.Int64(), &l.eError)
 	if !l.ok() {
 		return l
 	}
@@ -145,11 +158,11 @@ func (l LocalTimeChain) WithField(field Field, value TemporalValue) LocalTimeCha
 	var minute = l.value.Minute()
 	switch field {
 	case FieldNanoOfDay:
-		l.value, l.Error = LocalTimeOfNanoOfDay(newValue)
+		l.value, l.eError = LocalTimeOfNanoOfDay(newValue)
 	case FieldMicroOfDay:
-		l.value, l.Error = LocalTimeOfNanoOfDay(newValue * 1000)
+		l.value, l.eError = LocalTimeOfNanoOfDay(newValue * 1000)
 	case FieldMilliOfDay:
-		l.value, l.Error = LocalTimeOfNanoOfDay(newValue * 1000_000)
+		l.value, l.eError = LocalTimeOfNanoOfDay(newValue * 1000_000)
 	case FieldNanoOfSecond:
 		return l.WithNano(int(newValue))
 	case FieldMicroOfSecond:
@@ -177,9 +190,9 @@ func (l LocalTimeChain) WithField(field Field, value TemporalValue) LocalTimeCha
 		}
 		return l.WithHour(int(newValue))
 	case FieldAmPmOfDay:
-		return l.PlusHours((newValue - int64(hour/12)) * 12)
+		return l.PlusHours((newValue - int64(hour)/12) * 12)
 	default:
-		l.Error = unsupportedField(field)
+		l.eError = unsupportedField(field)
 	}
 	return l
 }

@@ -104,7 +104,7 @@ func (d LocalDate) Chain() (chain LocalDateChain) {
 
 func (d LocalDate) chainWithError(e error) (chain LocalDateChain) {
 	chain = d.Chain()
-	chain.Error = e
+	chain.eError = e
 	return
 }
 
@@ -380,12 +380,12 @@ func MustLocalDateParse(s string) LocalDate {
 }
 
 func MustLocalDateOfUnixEpochDays(days int64) LocalDate {
-	return mustValue(LocalDateOfUnixEpochDays(days))
+	return mustValue(LocalDateOfEpochDays(days))
 }
 
-// LocalDateOfUnixEpochDays creates a LocalDate from the number of days since Unix epoch (1970-01-01).
+// LocalDateOfEpochDays creates a LocalDate from the number of days since Unix epoch (1970-01-01).
 // Positive values represent dates after the epoch, negative before.
-func LocalDateOfUnixEpochDays(days int64) (LocalDate, error) {
+func LocalDateOfEpochDays(days int64) (LocalDate, error) {
 	const DaysPerCycle = 365*400 + 97
 	const Days0000To1970 = (DaysPerCycle * 5) - (30*365 + 7)
 	zeroDay := days + Days0000To1970

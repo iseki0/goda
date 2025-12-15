@@ -1,50 +1,86 @@
 package goda
 
 type Chain[T interface{ IsZero() bool }] struct {
-	value T
-	Error error
+	value  T
+	eError error
+	eType  string
+	eFunc  string
+}
+
+func (c Chain[T]) markError(typeName string, funcName string, e error) Chain[T] {
+	if c.eError == nil {
+		c.eError = e
+		c.eType = typeName
+		c.eFunc = funcName
+	}
+	return c
 }
 
 func (c Chain[T]) ok() bool {
-	return c.Error == nil && !c.value.IsZero()
+	return c.eError == nil && !c.value.IsZero()
 }
 
 func (c Chain[T]) MustGet() T {
-	if c.Error != nil {
-		panic(c.Error)
+	if c.eError != nil {
+		panic(c.eError)
 	}
 	return c.value
 }
 
 func (c Chain[T]) GetError() error {
-	return c.Error
+	return c.eError
 }
 
 func (c Chain[T]) GetOrElse(other T) T {
-	if c.Error != nil {
+	if c.eError != nil {
 		return other
 	}
 	return c.value
 }
 
 func (c Chain[T]) GetOrElseGet(other func() T) T {
-	if c.Error != nil {
+	if c.eError != nil {
 		return other()
 	}
 	return c.value
 }
 
 func (c Chain[T]) GetResult() (T, error) {
-	return c.value, c.Error
+	return c.value, c.eError
 }
 
 func (c Chain[T]) IsZero() bool {
-	return c.Error == nil && c.value.IsZero()
+	return c.eError == nil && c.value.IsZero()
 }
 
-func (c Chain[T]) getError(e *error) T {
+func (c Chain[T]) mergeError(e *error) T {
 	if *e == nil {
-		*e = c.Error
+		*e = c.eError
 	}
 	return c.value
+}
+
+func (c *Chain[T]) enterFunction(typeName string, funcName string) bool {
+	if !c.ok() || c.eType != "" {
+		return false
+	}
+	c.eType = typeName
+	c.eFunc = funcName
+	return true
+}
+
+func (c *Chain[T]) leaveFunction(flag bool) {
+	if !flag {
+		return
+	}
+	if c.eError == nil {
+		c.eType = ""
+		c.eFunc = ""
+		return
+	}
+	//goland:noinspection GoTypeAssertionOnErrors
+	if ce, ok := c.eError.(*Error); ok {
+		ce.typeName = c.eType
+		ce.funcName = c.eFunc
+	}
 }

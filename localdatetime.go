@@ -190,7 +190,7 @@ func (dt LocalDateTime) Chain() (chain LocalDateTimeChain) {
 
 func (dt LocalDateTime) chainWithError(e error) (chain LocalDateTimeChain) {
 	chain = dt.Chain()
-	chain.Error = e
+	chain.eError = e
 	return
 }
 
@@ -215,6 +215,22 @@ func LocalDateTimeOf(year Year, month Month, day, hour, minute, second, nanoseco
 // Panics if any component is invalid.
 func MustLocalDateTimeOf(year Year, month Month, day, hour, minute, second, nanosecond int) LocalDateTime {
 	return mustValue(LocalDateTimeOf(year, month, day, hour, minute, second, nanosecond))
+}
+
+func LocalDateTimeOfEpochSecond(epochSecond int64, nanoOfSecond int64, offset ZoneOffset) (r LocalDateTime, e error) {
+	FieldNanoOfSecond.checkSetE(nanoOfSecond, &e)
+	if e != nil {
+		return
+	}
+	var localSecond = epochSecond + int64(offset.TotalSeconds())
+	var localEpochDay = floorDiv(localSecond, 86400)
+	var secsOfDay = floorMod(localSecond, 86400)
+	r.date, e = LocalDateOfEpochDays(localEpochDay)
+	if e != nil {
+		return
+	}
+	r.time, e = LocalTimeOfNanoOfDay(secsOfDay*time.Second.Nanoseconds() + nanoOfSecond)
+	return
 }
 
 // LocalDateTimeNow returns the current date-time in the system's local time zone.
