@@ -18,7 +18,7 @@ A Go implementation inspired by Java's `java.time` package (JSR-310), providing 
 - 📅 **LocalDate**: Date without time (e.g., `2024-03-15`)
 - ⏰ **LocalTime**: Time without date (e.g., `14:30:45.123456789`)
 - 📆 **LocalDateTime**: Date-time without timezone (e.g., `2024-03-15T14:30:45.123456789`)
-- 🌐 **ZoneOffset**: Time-zone offset from Greenwich/UTC (e.g., `+08:00`)
+- 🌐 **ZoneOffset**: Time-zone offset from Greenwich/UTC (e.g., `+08:00`, `-05:00`, `Z`)
 - 🌍 **OffsetDateTime**: Date-time with offset (e.g., `2024-03-15T14:30:45.123456789+01:00`)
 - 🔢 **Field**: Enumeration of date-time fields (like Java's `ChronoField`)
 - 🔍 **TemporalAccessor**: Universal interface for querying temporal objects
@@ -280,6 +280,25 @@ db.Exec("INSERT INTO records (created_at, updated_at) VALUES (?, ?)",
 | `LocalTimeChain`   | Chain operations for LocalTime          | `time.Chain().PlusHours(1).MustGet()`  |
 | `LocalDateTimeChain`| Chain operations for LocalDateTime      | `dt.Chain().PlusDays(1).MustGet()`     |
 | `OffsetDateTimeChain`| Chain operations for OffsetDateTime     | `odt.Chain().PlusHours(1).MustGet()`   |
+
+### Format Specification
+
+This package uses ISO 8601 basic calendar date and time formats (not the full specification):
+
+**LocalDate**: `yyyy-MM-dd` (e.g., "2024-03-15")  
+Only Gregorian calendar dates. No week dates (YYYY-Www-D) or ordinal dates (YYYY-DDD).
+
+**LocalTime**: `HH:mm:ss[.nnnnnnnnn]` (e.g., "14:30:45.123456789")  
+24-hour format. Fractional seconds up to nanoseconds. Fractional seconds are aligned to 3-digit boundaries (milliseconds, microseconds, nanoseconds) for Java.time compatibility: 100ms → "14:30:45.100", 123.4ms → "14:30:45.123400". Parsing accepts any length of fractional seconds (e.g., "14:30:45.1" → 100ms).
+
+**LocalDateTime**: `yyyy-MM-ddTHH:mm:ss[.nnnnnnnnn]` (e.g., "2024-03-15T14:30:45.123456789")  
+Combined with 'T' separator (lowercase 't' accepted when parsing).
+
+**ZoneOffset**: `±HH:mm[:ss]` or `Z` for UTC (e.g., "+08:00", "-05:30", "Z")  
+Hours must be in range [-18, 18], minutes and seconds in [0, 59]. Compact formats (±HH, ±HHMM, ±HHMMSS) are also supported.
+
+**OffsetDateTime**: `yyyy-MM-ddTHH:mm:ss[.nnnnnnnnn]±HH:mm[:ss]` (e.g., "2024-03-15T14:30:45+08:00")  
+Combines LocalDateTime and ZoneOffset. 'Z' is accepted as UTC offset.
 
 ### Time Formatting
 
