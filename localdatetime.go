@@ -6,6 +6,7 @@ import (
 	"encoding"
 	"encoding/json"
 	"fmt"
+	"math"
 	"time"
 )
 
@@ -296,3 +297,6 @@ var (
 func _assertLocalDateTimeIsComparable[T comparable](t T) {}
 
 var _ = _assertLocalDateTimeIsComparable[LocalDateTime]
+
+var localDateTimeMinEpochSecond = mustValue(LocalDateTimeOfEpochSecond(math.MinInt64, 0, ZoneOffsetUTC()))
+var localDateTimeMaxEpochSecond = mustValue(LocalDateTimeOfEpochSecond(math.MaxInt64, 0, ZoneOffsetUTC()))

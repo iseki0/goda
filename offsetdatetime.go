@@ -134,7 +134,10 @@ func (odt OffsetDateTime) GetField(field Field) TemporalValue {
 	// Handle offset-specific fields
 	switch field {
 	case FieldInstantSeconds:
-		return TemporalValue{v: odt.EpochSecond() - int64(odt.offset.TotalSeconds())}
+		v, o := odt.epochSecondOverflow()
+		return TemporalValue{v: v, overflow: o}
+	case FieldOffsetSeconds:
+		return TemporalValue{v: int64(odt.Offset().totalSeconds)}
 	}
 
 	// Delegate to LocalDateTime for date and time fields
@@ -154,12 +157,19 @@ func (odt OffsetDateTime) GoTime() time.Time {
 
 // EpochSecond returns the number of seconds since Unix epoch (1970-01-01T00:00:00Z).
 func (odt OffsetDateTime) EpochSecond() int64 {
+	i, _ := odt.epochSecondOverflow()
+	return i
+}
+
+func (odt OffsetDateTime) epochSecondOverflow() (i int64, overflow bool) {
 	if odt.IsZero() {
-		return 0
+		return 0, false
 	}
 	epochDay := odt.datetime.LocalDate().UnixEpochDays()
 	secondsOfDay := odt.datetime.LocalTime().GetField(FieldSecondOfDay).Int64()
-	return epochDay*86400 + secondsOfDay - int64(odt.offset.TotalSeconds())
+	i, overflow = addExactly(epochDay*86400+secondsOfDay, -int64(odt.offset.TotalSeconds()))
+	overflow = overflow || odt.LocalDateTime().Compare(localDateTimeMinEpochSecond) < 0 || odt.LocalDateTime().Compare(localDateTimeMaxEpochSecond) > 0
+	return
 }
 
 // Compare compares this offset date-time with another.
