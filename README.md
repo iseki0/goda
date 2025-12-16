@@ -33,7 +33,6 @@ A Go implementation inspired by Java's `java.time` package (JSR-310), providing 
 - ✅ **Type-safe field access**: Query any field with `TemporalValue` return type that validates support and overflow
 - ✅ **TemporalAccessor interface**: Universal query pattern across all temporal types
 - ✅ **Chain operations**: Fluent API with error handling for complex mutations
-- ✅ **Zero-copy text marshaling** with `encoding.TextAppender`
 - ✅ **Immutable**: All operations return new values
 - ✅ **Type-safe**: Compile-time safety with distinct types
 - ✅ **Zero-value friendly**: Zero values are properly handled
@@ -327,7 +326,7 @@ All temporal types (`LocalDate`, `LocalTime`, `LocalDateTime`, `OffsetDateTime`)
 - `TemporalAccessor`: Universal query interface with `GetField(field Field) TemporalValue`
 - `fmt.Stringer`
 - `encoding.TextMarshaler` / `encoding.TextUnmarshaler`
-- `encoding.TextAppender` (zero-copy text marshaling)
+- `encoding.TextAppender`
 - `json.Marshaler` / `json.Unmarshaler`
 - `sql.Scanner` / `driver.Valuer`
 
