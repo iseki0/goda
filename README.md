@@ -58,8 +58,8 @@ import (
 
 func main() {
     // Create dates and times
-    date := goda.MustNewLocalDate(2024, goda.March, 15)
-    time := goda.MustNewLocalTime(14, 30, 45, 123456789)
+    date := goda.MustLocalDateOf(2024, goda.March, 15)
+    time := goda.MustLocalTimeOf(14, 30, 45, 123456789)
     datetime := date.AtTime(time)  // or time.AtDate(date)
     
     fmt.Println(date)     // 2024-03-15
@@ -67,7 +67,7 @@ func main() {
     fmt.Println(datetime) // 2024-03-15T14:30:45.123456789
     
     // Create from components directly
-    datetime2 := goda.MustNewLocalDateTime(2024, goda.March, 15, 14, 30, 45, 123456789)
+    datetime2 := goda.MustLocalDateTimeOf(2024, goda.March, 15, 14, 30, 45, 123456789)
     
     // With time zone offset
     offset := goda.MustZoneOffsetOfHours(1)  // +01:00
@@ -75,9 +75,9 @@ func main() {
     fmt.Println(offsetDateTime) // 2024-03-15T14:30:45.123456789+01:00
     
     // Parse from strings
-    date, _ = goda.ParseLocalDate("2024-03-15")
-    time = goda.MustParseLocalTime("14:30:45.123456789")
-    datetime = goda.MustParseLocalDateTime("2024-03-15T14:30:45")
+    date, _ = goda.LocalDateParse("2024-03-15")
+    time = goda.MustLocalTimeParse("14:30:45.123456789")
+    datetime = goda.MustLocalDateTimeParse("2024-03-15T14:30:45")
     
     // Get current date/time
     today := goda.LocalDateNow()
@@ -102,14 +102,14 @@ func main() {
 Access individual date-time fields using the `Field` enumeration with type-safe `TemporalValue` returns:
 
 ```go
-date := goda.MustNewLocalDate(2024, goda.March, 15)
+date := goda.MustLocalDateOf(2024, goda.March, 15)
 
 // Check field support
 fmt.Println(date.IsSupportedField(goda.FieldDayOfMonth))  // true
 fmt.Println(date.IsSupportedField(goda.FieldHourOfDay))   // false
 
 // Get field values with validation
-year := date.GetField(goda.FieldYearField)
+year := date.GetField(goda.FieldYear)
 if year.Valid() {
     fmt.Println("Year:", year.Int64())  // 2024
 }
@@ -126,7 +126,7 @@ if hourOfDay.Unsupported() {
 }
 
 // Time fields
-time := goda.MustNewLocalTime(14, 30, 45, 123456789)
+time := goda.MustLocalTimeOf(14, 30, 45, 123456789)
 hour := time.GetField(goda.FieldHourOfDay)
 if hour.Valid() {
     fmt.Println("Hour:", hour.Int())  // 14
@@ -179,45 +179,37 @@ printYear(goda.LocalDateTimeNow())
 
 ### Chain Operations
 
-All temporal types support chain operations for fluent, error-handled mutations:
+All temporal types support chain operations for fluent, error-handled mutations. Chain operations allow you to perform multiple modifications in a single expression with proper error handling:
 
 ```go
-// Basic chain operations
-date := goda.MustLocalDateOf(2024, goda.March, 15)
-
 // Chain multiple operations fluently
-future := date.Chain().
-    PlusDays(7).
-    PlusMonths(1).
-    WithDayOfMonth(1).
-    MustGet()
+dt := goda.MustLocalDateTimeOf(2024, goda.March, 15, 14, 30, 45, 123456789)
 
-// Error handling with chain operations
-result, err := date.Chain().
-    PlusDays(30).
-    WithDayOfMonth(32).  // Invalid day
-    GetResult()
+// Chain date and time modifications
+meetingTime := dt.Chain().
+    PlusDays(7).              // Next week
+    WithHour(16).             // At 4 PM
+    WithMinute(0).            // On the hour
+    WithSecond(0).            // No seconds
+    WithNano(0).              // No nanoseconds
+    MustGet()                 // Get result (panics on error)
+
+fmt.Println("Meeting scheduled for:", meetingTime)
+
+// Error handling with chains
+result, err := dt.Chain().
+    PlusMonths(1).
+    WithDayOfMonth(32).       // Invalid day - will cause error
+    GetResult()               // Returns (zero value, error)
 
 if err != nil {
-    fmt.Println("Chain operation failed:", err)
+    fmt.Println("Invalid operation:", err)
+    // Use fallback
+    validTime := dt.Chain().
+        PlusMonths(1).
+        WithDayOfMonth(31).   // Valid day
+        GetOrElse(dt)         // Fallback to original if error
 }
-
-// Get error without result
-if err := date.Chain().WithDayOfMonth(32).GetError(); err != nil {
-    fmt.Println("Validation error:", err)
-}
-
-// Fallback with GetOrElse
-valid := date.Chain().
-    WithDayOfMonth(32).  // Invalid
-    GetOrElse(date)      // Fallback to original
-
-// GetOrElse with function
-fallback := date.Chain().
-    WithDayOfMonth(32).
-    GetOrElseGet(func() goda.LocalDate {
-        return goda.LocalDateNow()
-    })
 ```
 
 ### JSON Serialization
@@ -233,10 +225,10 @@ type Event struct {
 
 event := Event{
     Name:        "Meeting",
-    Date:        goda.MustNewLocalDate(2024, goda.March, 15),
-    Time:        goda.MustNewLocalTime(14, 30, 0, 0),
-    CreatedAt:   goda.MustParseLocalDateTime("2024-03-15T14:30:00"),
-    ScheduledAt: goda.MustParseOffsetDateTime("2024-03-15T14:30:00+08:00"),
+    Date:        goda.MustLocalDateOf(2024, goda.March, 15),
+    Time:        goda.MustLocalTimeOf(14, 30, 0, 0),
+    CreatedAt:   goda.MustLocalDateTimeParse("2024-03-15T14:30:00"),
+    ScheduledAt: goda.MustOffsetDateTimeParse("2024-03-15T14:30:00+08:00"),
 }
 
 jsonData, _ := json.Marshal(event)
