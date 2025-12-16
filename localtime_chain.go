@@ -28,7 +28,7 @@ func (l LocalTimeChain) PlusMinutes(minutesToAdd int64) LocalTimeChain {
 		return l
 	}
 	var mofd = int64(l.value.Hour()*60 + l.value.Minute())
-	var newMofd = minutesToAdd%(60*24) + mofd + (60*24)%(60*24)
+	var newMofd = (minutesToAdd%(60*24) + mofd + (60 * 24)) % (60 * 24)
 	if mofd == newMofd {
 		return l
 	}

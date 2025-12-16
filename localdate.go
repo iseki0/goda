@@ -308,7 +308,7 @@ func LocalDateOfYearDay(year Year, dayOfYear int) (r LocalDate, e error) {
 		return
 	}
 	leap := year.IsLeapYear()
-	if dayOfYear == 366 && leap == false {
+	if dayOfYear == 366 && !leap {
 		e = newError("invalid date DayOfYear 366 in non-leap year")
 	}
 	moy := Month((dayOfYear-1)/31 + 1)

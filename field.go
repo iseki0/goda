@@ -177,7 +177,6 @@ func (f Field) checkSetE(value int64, e *error) {
 		return
 	}
 	*e = f.check(value)
-	return
 }
 
 func (f Field) Valid() bool {

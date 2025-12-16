@@ -7,15 +7,6 @@ type Chain[T interface{ IsZero() bool }] struct {
 	eFunc  string
 }
 
-func (c Chain[T]) markError(typeName string, funcName string, e error) Chain[T] {
-	if c.eError == nil {
-		c.eError = e
-		c.eType = typeName
-		c.eFunc = funcName
-	}
-	return c
-}
-
 func (c Chain[T]) ok() bool {
 	return c.eError == nil && !c.value.IsZero()
 }
