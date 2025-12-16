@@ -32,6 +32,7 @@ A Go implementation inspired by Java's `java.time` package (JSR-310), providing 
 - ✅ **Date arithmetic**: Add/subtract days, months, years with overflow handling
 - ✅ **Type-safe field access**: Query any field with `TemporalValue` return type that validates support and overflow
 - ✅ **TemporalAccessor interface**: Universal query pattern across all temporal types
+- ✅ **Chain operations**: Fluent API with error handling for complex mutations
 - ✅ **Zero-copy text marshaling** with `encoding.TextAppender`
 - ✅ **Immutable**: All operations return new values
 - ✅ **Type-safe**: Compile-time safety with distinct types
@@ -85,9 +86,9 @@ func main() {
     currentOffsetDateTime := goda.OffsetDateTimeNow()
     
     // Date arithmetic
-    tomorrow := today.PlusDays(1)
-    nextMonth := today.PlusMonths(1)
-    nextYear := today.PlusYears(1)
+    tomorrow := today.Chain().PlusDays(1).MustGet()
+    nextMonth := today.Chain().PlusMonths(1).MustGet()
+    nextYear := today.Chain().PlusYears(1).MustGet()
     
     // Comparisons
     if tomorrow.IsAfter(today) {
@@ -120,9 +121,9 @@ odtPST := odtEST.WithOffsetSameLocal(pst)  // Local time unchanged: 14:30:45-08:
 // Change offset while keeping the instant
 odtPST2 := odtEST.WithOffsetSameInstant(pst)  // Instant preserved: 11:30:45-08:00
 
-// Time arithmetic with offset
-tomorrow := odt.PlusDays(1)
-inTwoHours := odt.PlusHours(2)
+	// Time arithmetic with offset
+	tomorrow := odt.Chain().PlusDays(1).MustGet()
+	inTwoHours := odt.Chain().PlusHours(2).MustGet()
 
 // Convert to Unix timestamp
 epochSecond := odt.ToEpochSecond()
@@ -213,6 +214,49 @@ printYear(goda.LocalDateNow())
 printYear(goda.LocalDateTimeNow())
 ```
 
+### Chain Operations
+
+All temporal types support chain operations for fluent, error-handled mutations:
+
+```go
+// Basic chain operations
+date := goda.MustLocalDateOf(2024, goda.March, 15)
+
+// Chain multiple operations fluently
+future := date.Chain().
+    PlusDays(7).
+    PlusMonths(1).
+    WithDayOfMonth(1).
+    MustGet()
+
+// Error handling with chain operations
+result, err := date.Chain().
+    PlusDays(30).
+    WithDayOfMonth(32).  // Invalid day
+    GetResult()
+
+if err != nil {
+    fmt.Println("Chain operation failed:", err)
+}
+
+// Get error without result
+if err := date.Chain().WithDayOfMonth(32).GetError(); err != nil {
+    fmt.Println("Validation error:", err)
+}
+
+// Fallback with GetOrElse
+valid := date.Chain().
+    WithDayOfMonth(32).  // Invalid
+    GetOrElse(date)      // Fallback to original
+
+// GetOrElse with function
+fallback := date.Chain().
+    WithDayOfMonth(32).
+    GetOrElseGet(func() goda.LocalDate {
+        return goda.LocalDateNow()
+    })
+```
+
 ### JSON Serialization
 
 ```go
@@ -276,6 +320,11 @@ db.Exec("INSERT INTO records (created_at, updated_at) VALUES (?, ?)",
 | `Field`            | Date-time field enumeration             | `HourOfDay`, `DayOfMonth`              |
 | `TemporalAccessor` | Interface for querying temporal objects | Implemented by all temporal types      |
 | `TemporalValue`    | Type-safe field value with validation   | Returned by `GetField()`               |
+| `Error`            | Structured error with context           | Provides detailed error information    |
+| `LocalDateChain`   | Chain operations for LocalDate          | `date.Chain().PlusDays(1).MustGet()`   |
+| `LocalTimeChain`   | Chain operations for LocalTime          | `time.Chain().PlusHours(1).MustGet()`  |
+| `LocalDateTimeChain`| Chain operations for LocalDateTime      | `dt.Chain().PlusDays(1).MustGet()`     |
+| `OffsetDateTimeChain`| Chain operations for OffsetDateTime     | `odt.Chain().PlusHours(1).MustGet()`   |
 
 ### Time Formatting
 
