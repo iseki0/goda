@@ -2,6 +2,7 @@ package goda
 
 import (
 	"database/sql/driver"
+	"errors"
 	"time"
 )
 
@@ -19,12 +20,13 @@ func (d *LocalDate) UnmarshalJSON(bytes []byte) error {
 // It parses dates in yyyy-MM-dd format.
 // Empty input is treated as zero value.
 func (d *LocalDate) UnmarshalText(text []byte) (e error) {
+	defer deferOpInParse(text, &e)
 	if len(text) == 0 {
 		*d = LocalDate{}
 		return nil
 	}
 	if text[len(text)-3] != '-' || text[len(text)-6] != '-' {
-		return unmarshalError(text)
+		return errors.New("'-' required")
 	}
 	var y int64
 	var m, dom int

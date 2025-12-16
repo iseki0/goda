@@ -24,7 +24,7 @@ func (y *YearMonth) UnmarshalText(text []byte) (e error) {
 	}
 	var i = bytes.IndexByte(text, '-')
 	if i == -1 {
-		return unmarshalError(text)
+		return parseFailedError(text)
 	}
 	var year int64
 	var month int64

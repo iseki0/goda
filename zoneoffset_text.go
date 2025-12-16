@@ -1,6 +1,9 @@
 package goda
 
-import "strconv"
+import (
+	"fmt"
+	"strconv"
+)
 
 // String returns the string representation of the zone offset.
 // Returns "Z" for UTC, otherwise returns the format ±HH:MM or ±HH:MM:SS.
@@ -47,10 +50,11 @@ func (z ZoneOffset) MarshalText() ([]byte, error) {
 }
 
 // UnmarshalText implements encoding.TextUnmarshaler.
-func (z *ZoneOffset) UnmarshalText(text []byte) error {
+func (z *ZoneOffset) UnmarshalText(text []byte) (e error) {
+	defer deferOpInParse(text, &e)
 	s := string(text)
 	if len(s) == 0 {
-		return newError("zone offset cannot be empty")
+		return fmt.Errorf("zone offset cannot be empty")
 	}
 
 	// Handle UTC
@@ -61,7 +65,7 @@ func (z *ZoneOffset) UnmarshalText(text []byte) error {
 
 	// Must start with + or -
 	if s[0] != '+' && s[0] != '-' {
-		return newError("zone offset must start with + or -, got %q", s)
+		return fmt.Errorf("zone offset must start with + or -, got %q", s)
 	}
 
 	negative := s[0] == '-'
@@ -72,7 +76,7 @@ func (z *ZoneOffset) UnmarshalText(text []byte) error {
 
 	// Determine format based on length and colons
 	if len(s) == 0 {
-		return newError("zone offset has no digits after sign")
+		return fmt.Errorf("zone offset has no digits after sign")
 	}
 
 	// check for colon-separated format
@@ -86,7 +90,7 @@ func (z *ZoneOffset) UnmarshalText(text []byte) error {
 
 	if hasColon {
 		// Colon-separated format: HH:MM or HH:MM:SS or H:MM
-		parts := []string{}
+		var parts []string
 		start := 0
 		for i := 0; i <= len(s); i++ {
 			if i == len(s) || s[i] == ':' {
@@ -98,23 +102,23 @@ func (z *ZoneOffset) UnmarshalText(text []byte) error {
 		}
 
 		if len(parts) < 2 || len(parts) > 3 {
-			return newError("invalid zone offset format %q", string(text))
+			return fmt.Errorf("invalid zone offset format %q", string(text))
 		}
 
 		hours, err = strconv.Atoi(parts[0])
 		if err != nil {
-			return newError("invalid zone offset hours: %v", err)
+			return fmt.Errorf("invalid zone offset hours: %v", err)
 		}
 
 		minutes, err = strconv.Atoi(parts[1])
 		if err != nil {
-			return newError("invalid zone offset minutes: %v", err)
+			return fmt.Errorf("invalid zone offset minutes: %v", err)
 		}
 
 		if len(parts) == 3 {
 			seconds, err = strconv.Atoi(parts[2])
 			if err != nil {
-				return newError("invalid zone offset seconds: %v", err)
+				return fmt.Errorf("invalid zone offset seconds: %v", err)
 			}
 		}
 	} else {
@@ -123,32 +127,32 @@ func (z *ZoneOffset) UnmarshalText(text []byte) error {
 		case 1, 2: // H or HH
 			hours, err = strconv.Atoi(s)
 			if err != nil {
-				return newError("invalid zone offset hours: %v", err)
+				return fmt.Errorf("invalid zone offset hours: %v", err)
 			}
 		case 4: // HHMM
 			hours, err = strconv.Atoi(s[0:2])
 			if err != nil {
-				return newError("invalid zone offset hours: %v", err)
+				return fmt.Errorf("invalid zone offset hours: %v", err)
 			}
 			minutes, err = strconv.Atoi(s[2:4])
 			if err != nil {
-				return newError("invalid zone offset minutes: %v", err)
+				return fmt.Errorf("invalid zone offset minutes: %v", err)
 			}
 		case 6: // HHMMSS
 			hours, err = strconv.Atoi(s[0:2])
 			if err != nil {
-				return newError("invalid zone offset hours: %v", err)
+				return fmt.Errorf("invalid zone offset hours: %v", err)
 			}
 			minutes, err = strconv.Atoi(s[2:4])
 			if err != nil {
-				return newError("invalid zone offset minutes: %v", err)
+				return fmt.Errorf("invalid zone offset minutes: %v", err)
 			}
 			seconds, err = strconv.Atoi(s[4:6])
 			if err != nil {
-				return newError("invalid zone offset seconds: %v", err)
+				return fmt.Errorf("invalid zone offset seconds: %v", err)
 			}
 		default:
-			return newError("invalid zone offset format %q", string(text))
+			return fmt.Errorf("invalid zone offset format %q", string(text))
 		}
 	}
 

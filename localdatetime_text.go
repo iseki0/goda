@@ -2,6 +2,7 @@ package goda
 
 import (
 	"database/sql/driver"
+	"errors"
 	"time"
 )
 
@@ -28,7 +29,8 @@ func (dt LocalDateTime) MarshalText() ([]byte, error) {
 
 // UnmarshalText implements encoding.TextUnmarshaler.
 // Accepts ISO 8601 format: yyyy-MM-ddTHH:mm:ss[.nnnnnnnnn]
-func (dt *LocalDateTime) UnmarshalText(text []byte) error {
+func (dt *LocalDateTime) UnmarshalText(text []byte) (e error) {
+	defer deferOpInParse(text, &e)
 	if len(text) == 0 {
 		*dt = LocalDateTime{}
 		return nil
@@ -44,7 +46,7 @@ func (dt *LocalDateTime) UnmarshalText(text []byte) error {
 	}
 
 	if sepIdx < 0 {
-		return newError("invalid date-time format: missing 'T' separator")
+		return errors.New("invalid date-time format: missing 'T' separator")
 	}
 
 	// Parse date part

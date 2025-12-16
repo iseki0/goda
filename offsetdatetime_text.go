@@ -2,6 +2,7 @@ package goda
 
 import (
 	"database/sql/driver"
+	"errors"
 	"time"
 )
 
@@ -27,7 +28,8 @@ func (odt OffsetDateTime) MarshalText() ([]byte, error) {
 
 // UnmarshalText implements encoding.TextUnmarshaler.
 // Accepts ISO 8601 format: yyyy-MM-ddTHH:mm:ss[.nnnnnnnnn]±HH:mm[:ss] or Z for UTC.
-func (odt *OffsetDateTime) UnmarshalText(text []byte) error {
+func (odt *OffsetDateTime) UnmarshalText(text []byte) (e error) {
+	defer deferOpInParse(text, &e)
 	if len(text) == 0 {
 		*odt = OffsetDateTime{}
 		return nil
@@ -48,7 +50,7 @@ func (odt *OffsetDateTime) UnmarshalText(text []byte) error {
 	}
 
 	if offsetIdx < 0 {
-		return newError("invalid offset date-time format: missing offset")
+		return errors.New("invalid offset date-time format: missing offset")
 	}
 
 	// Parse date-time part

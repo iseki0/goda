@@ -2,6 +2,7 @@ package goda
 
 import (
 	"database/sql/driver"
+	"errors"
 	"time"
 )
 
@@ -41,14 +42,15 @@ func (t *LocalTime) UnmarshalJSON(bytes []byte) error {
 }
 
 // UnmarshalText implements encoding.TextUnmarshaler.
-func (t *LocalTime) UnmarshalText(text []byte) error {
+func (t *LocalTime) UnmarshalText(text []byte) (e error) {
+	defer deferOpInParse(text, &e)
 	if len(text) == 0 {
 		*t = LocalTime{}
 		return nil
 	}
 
 	if len(text) < 8 {
-		return newError("invalid format")
+		return errors.New("invalid format")
 	}
 
 	hour, err := parseInt(text[0:2])
@@ -56,14 +58,14 @@ func (t *LocalTime) UnmarshalText(text []byte) error {
 		return err
 	}
 	if text[2] != ':' {
-		return newError("expect ':'")
+		return errors.New("expect ':'")
 	}
 	minute, err := parseInt(text[3:5])
 	if err != nil {
 		return err
 	}
 	if text[5] != ':' {
-		return newError("expect ':'")
+		return errors.New("expect ':'")
 	}
 	second, err := parseInt(text[6:8])
 	if err != nil {
@@ -71,10 +73,9 @@ func (t *LocalTime) UnmarshalText(text []byte) error {
 	}
 
 	var nano int64 = 0
-	var e error
 	if len(text) > 8 {
 		if text[8] != '.' {
-			return newError("expect '.'")
+			return errors.New("expect '.'")
 		}
 	}
 	if len(text) > 9 {

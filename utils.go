@@ -11,13 +11,14 @@ func parseInt64(input []byte) (int64, error) {
 	return strconv.ParseInt(string(input), 10, 64)
 }
 
-func parseInt(input []byte) (int, error) {
-	return strconv.Atoi(string(input))
+func parseInt(input []byte) (i int, e error) {
+	i, e = strconv.Atoi(string(input))
+	return
 }
 
 func unmarshalJsonImpl[T encoding.TextUnmarshaler](ref T, data []byte) error {
 	if len(data) < 2 || data[0] != '"' || data[len(data)-1] != '"' {
-		return newError("expect a JSON string")
+		return parseFailedError(data)
 	}
 	return ref.UnmarshalText(data[1 : len(data)-1])
 }
@@ -103,20 +104,6 @@ func mustValue[T any](v T, err error) T {
 		panic(err)
 	}
 	return v
-}
-
-func checkTemporalInRange(field Field, from, to int64, value TemporalValue, oldError error) (e error) {
-	if oldError != nil {
-		return oldError
-	}
-	return checkInRange(field.String(), from, to, value.Int64())
-}
-
-func checkInRange(field string, from, to, value int64) (e error) {
-	if value < from || value > to {
-		return newError("%s out of range: %d", field, value)
-	}
-	return nil
 }
 
 func addExactly(x, y int64) (r int64, overflow bool) {

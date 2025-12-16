@@ -1,6 +1,7 @@
 package goda
 
 import (
+	"errors"
 	"fmt"
 )
 
@@ -8,11 +9,6 @@ import (
 // All error messages are prefixed with "goda: ".
 func newError(format string, a ...any) error {
 	return &Error{message: fmt.Sprintf(format, a...)}
-}
-
-// unmarshalError creates an error for invalid unmarshaling input.
-func unmarshalError(userInput []byte) error {
-	return newError("unable to unmarshal user input: %q", string(userInput))
 }
 
 // sqlScannerDefaultBranch creates an error for unsupported SQL scan types.
@@ -25,6 +21,7 @@ const (
 	errReasonUnsupportedField
 	errReasonOutOfRange
 	errReasonArithmeticOverflow
+	errReasonParseFailed
 )
 
 // Error is the error type used by this package.
@@ -52,6 +49,8 @@ func (e Error) Error() string {
 		text = fmt.Sprintf("goda: invalid value of %s (valid range %d - %d): %d", e.field, fr.Min, fr.Max, e.int64Value)
 	case errReasonArithmeticOverflow:
 		text = "goda: arithmetic overflow"
+	case errReasonParseFailed:
+		text = "goda: parse user input failed"
 	default:
 		text = "goda: " + e.message
 	}
@@ -65,6 +64,9 @@ func (e Error) Error() string {
 }
 
 func (e Error) Unwrap() error {
+	if e.cause == nil && e.reason == errReasonUnsupportedField {
+		return errors.ErrUnsupported
+	}
 	return e.cause
 }
 
@@ -82,4 +84,22 @@ func unsupportedField(field Field) error {
 
 func invalidFieldError(field Field) error {
 	return &Error{reason: errReasonInvalidField, field: field}
+}
+
+func parseFailedError(userInput []byte) error {
+	return &Error{reason: errReasonParseFailed}
+}
+
+func parseFailedErrorWithCause(userInput []byte, cause error) error {
+	return &Error{reason: errReasonParseFailed, cause: cause}
+}
+
+func deferOpInParse(userInput []byte, e *error) {
+	if *e == nil {
+		return
+	}
+	//goland:noinspection GoTypeAssertionOnErrors
+	if _, ok := (*e).(*Error); !ok {
+		*e = parseFailedErrorWithCause(userInput, *e)
+	}
 }
