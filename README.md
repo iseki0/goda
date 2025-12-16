@@ -97,43 +97,6 @@ func main() {
 }
 ```
 
-### Working with Time Zones
-
-```go
-// Create with offset
-offset := goda.MustZoneOffsetOfHours(8)  // +08:00 (China Standard Time)
-odt := goda.MustNewOffsetDateTime(2024, goda.March, 15, 14, 30, 45, 0, offset)
-
-// Parse with offset
-odt, _ = goda.ParseOffsetDateTime("2024-03-15T14:30:45+08:00")
-odt = goda.MustParseOffsetDateTime("2024-03-15T14:30:45Z")  // UTC
-
-// Convert from Go's time.Time (preserves offset)
-goTime := time.Now()
-odt = goda.OffsetDateTimeOfGoTime(goTime)
-
-// Change offset while keeping local time
-est := goda.MustZoneOffsetOfHours(-5)  // EST
-pst := goda.MustZoneOffsetOfHours(-8)  // PST
-odtEST := goda.MustNewOffsetDateTime(2024, goda.March, 15, 14, 30, 45, 0, est)
-odtPST := odtEST.WithOffsetSameLocal(pst)  // Local time unchanged: 14:30:45-08:00
-
-// Change offset while keeping the instant
-odtPST2 := odtEST.WithOffsetSameInstant(pst)  // Instant preserved: 11:30:45-08:00
-
-	// Time arithmetic with offset
-	tomorrow := odt.Chain().PlusDays(1).MustGet()
-	inTwoHours := odt.Chain().PlusHours(2).MustGet()
-
-// Convert to Unix timestamp
-epochSecond := odt.ToEpochSecond()
-
-// Compare based on instant
-if odt1.IsBefore(odt2) {
-    fmt.Println("odt1 is earlier")
-}
-```
-
 ### Field Access with TemporalValue
 
 Access individual date-time fields using the `Field` enumeration with type-safe `TemporalValue` returns:
@@ -142,34 +105,34 @@ Access individual date-time fields using the `Field` enumeration with type-safe 
 date := goda.MustNewLocalDate(2024, goda.March, 15)
 
 // Check field support
-fmt.Println(date.IsSupportedField(goda.DayOfMonth))  // true
-fmt.Println(date.IsSupportedField(goda.HourOfDay))   // false
+fmt.Println(date.IsSupportedField(goda.FieldDayOfMonth))  // true
+fmt.Println(date.IsSupportedField(goda.FieldHourOfDay))   // false
 
 // Get field values with validation
-year := date.GetField(goda.YearField)
+year := date.GetField(goda.FieldYearField)
 if year.Valid() {
     fmt.Println("Year:", year.Int64())  // 2024
 }
 
-dayOfWeek := date.GetField(goda.DayOfWeekField)
+dayOfWeek := date.GetField(goda.FieldDayOfWeek)
 if dayOfWeek.Valid() {
     fmt.Println("Day of week:", dayOfWeek.Int())  // 5 (Friday)
 }
 
 // Unsupported fields return unsupported TemporalValue
-hourOfDay := date.GetField(goda.HourOfDay)
+hourOfDay := date.GetField(goda.FieldHourOfDay)
 if hourOfDay.Unsupported() {
     fmt.Println("Hour field is not supported for LocalDate")
 }
 
 // Time fields
 time := goda.MustNewLocalTime(14, 30, 45, 123456789)
-hour := time.GetField(goda.HourOfDay)
+hour := time.GetField(goda.FieldHourOfDay)
 if hour.Valid() {
     fmt.Println("Hour:", hour.Int())  // 14
 }
 
-nanoOfDay := time.GetField(goda.NanoOfDay)
+nanoOfDay := time.GetField(goda.FieldNanoOfDay)
 if nanoOfDay.Valid() {
     fmt.Println("Nanoseconds since midnight:", nanoOfDay.Int64())
 }
@@ -204,7 +167,7 @@ type TemporalAccessor interface {
 
 // Write generic functions that work with any temporal type
 func printYear(t goda.TemporalAccessor) {
-    if year := t.GetField(goda.YearField); year.Valid() {
+    if year := t.GetField(goda.FieldYear); year.Valid() {
         fmt.Printf("Year: %d\n", year.Int())
     }
 }
